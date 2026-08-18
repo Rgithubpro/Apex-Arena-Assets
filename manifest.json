@@ -1,0 +1,248 @@
+{
+  "generated": "2026-08-18T10:58:55.207Z",
+  "bundles": {
+    "assets/icons/profile-pictures.zip": {
+      "hash": "d409ee30b78e1b80",
+      "size": 4113309,
+      "prefix": "assets/icons/profile-pictures"
+    }
+  },
+  "loose": {
+    "assets/backgrounds/loading-screen-no-wifi.png": {
+      "hash": "fc0572c3ee613573",
+      "size": 443835
+    },
+    "assets/fonts/Fredoka-Regular.ttf": {
+      "hash": "638482f81fcecafb",
+      "size": 157744
+    },
+    "assets/fonts/LilitaOne-Regular.ttf": {
+      "hash": "4444c23631884f41",
+      "size": 26828
+    },
+    "assets/fonts/LuckiestGuy-Regular.ttf": {
+      "hash": "fbe683091b0db0fa",
+      "size": 58324
+    },
+    "assets/icons/general/battlepass-normal.png": {
+      "hash": "2de7eb9d5176b915",
+      "size": 4824
+    },
+    "assets/icons/general/battlepass-premium.png": {
+      "hash": "d71179a063e4341a",
+      "size": 4881
+    },
+    "assets/icons/general/battler-xp.png": {
+      "hash": "2d31ea921b03f281",
+      "size": 4801
+    },
+    "assets/icons/general/battlers.png": {
+      "hash": "b25350654c1637e5",
+      "size": 7408
+    },
+    "assets/icons/general/chat.png": {
+      "hash": "d3bc0ca83e48b32f",
+      "size": 3427
+    },
+    "assets/icons/general/clock.png": {
+      "hash": "cf8c57bac5fd087b",
+      "size": 6686
+    },
+    "assets/icons/general/club-blue.png": {
+      "hash": "8220ff0cc6accbde",
+      "size": 2403
+    },
+    "assets/icons/general/club-green.png": {
+      "hash": "5f2da93317b05a62",
+      "size": 2405
+    },
+    "assets/icons/general/club-red.png": {
+      "hash": "84dedad87683d405",
+      "size": 2409
+    },
+    "assets/icons/general/club-white.png": {
+      "hash": "15c729e31a5944e4",
+      "size": 1272
+    },
+    "assets/icons/general/club-yellow.png": {
+      "hash": "f476c47cfa862b7a",
+      "size": 2409
+    },
+    "assets/icons/general/coins.png": {
+      "hash": "62ad19864c0fa4e2",
+      "size": 6585
+    },
+    "assets/icons/general/crystals.png": {
+      "hash": "dfb88d2967fe6cda",
+      "size": 5884
+    },
+    "assets/icons/general/flame1.png": {
+      "hash": "efd0d1ec64e5580d",
+      "size": 5101
+    },
+    "assets/icons/general/flame2.png": {
+      "hash": "170f54c7f72e4b8c",
+      "size": 5095
+    },
+    "assets/icons/general/flame3.png": {
+      "hash": "648c64161c65ed37",
+      "size": 5094
+    },
+    "assets/icons/general/friends.png": {
+      "hash": "9c1e81de63e46a0a",
+      "size": 7966
+    },
+    "assets/icons/general/gems.png": {
+      "hash": "1ee5ead47aa5a2cd",
+      "size": 4096
+    },
+    "assets/icons/general/hanger.png": {
+      "hash": "ee5e89b05c99ad85",
+      "size": 25738
+    },
+    "assets/icons/general/hide-password.png": {
+      "hash": "c222905f638f79de",
+      "size": 27843
+    },
+    "assets/icons/general/info.png": {
+      "hash": "5ff72cb737a6980e",
+      "size": 4983
+    },
+    "assets/icons/general/news.png": {
+      "hash": "957d55c3146f9cf6",
+      "size": 13438
+    },
+    "assets/icons/general/placeholder.png": {
+      "hash": "b73629ad6a23dadf",
+      "size": 3083
+    },
+    "assets/icons/general/power-flame.png": {
+      "hash": "a043b36a99a8f74f",
+      "size": 3607
+    },
+    "assets/icons/general/powerpoints.png": {
+      "hash": "a63a2f1f83491868",
+      "size": 4604
+    },
+    "assets/icons/general/quests.png": {
+      "hash": "46df7b301bf8769a",
+      "size": 6159
+    },
+    "assets/icons/general/settings.png": {
+      "hash": "be0de318a710a083",
+      "size": 6134
+    },
+    "assets/icons/general/shop.png": {
+      "hash": "7165b6e958a40040",
+      "size": 6178
+    },
+    "assets/icons/general/show-password.png": {
+      "hash": "42721f498a5e7a3e",
+      "size": 25734
+    },
+    "assets/icons/general/stardrop.png": {
+      "hash": "a193672488a2f369",
+      "size": 4648
+    },
+    "assets/icons/general/teamup.png": {
+      "hash": "2e9a66d9600ced78",
+      "size": 6480
+    },
+    "assets/icons/general/trophy.png": {
+      "hash": "0f880daae3116bb3",
+      "size": 6957
+    },
+    "assets/icons/ranks/battler/rank1.png": {
+      "hash": "0f880daae3116bb3",
+      "size": 6957
+    },
+    "assets/icons/ranks/battler/rank2.png": {
+      "hash": "5fd690f28db4d822",
+      "size": 6710
+    },
+    "assets/icons/ranks/battler/rank3.png": {
+      "hash": "c16eefb8730ed423",
+      "size": 6818
+    },
+    "assets/icons/ranks/battler/rank4.png": {
+      "hash": "27c44b9ea89a742a",
+      "size": 6705
+    },
+    "assets/icons/ranks/battler/rank5.png": {
+      "hash": "1982dababdef6551",
+      "size": 7061
+    },
+    "assets/icons/ranks/battler/rank6.png": {
+      "hash": "debad626f8745040",
+      "size": 6706
+    },
+    "assets/icons/ranks/trophyroad/rank1.png": {
+      "hash": "23c10360de347ceb",
+      "size": 37962
+    },
+    "assets/icons/ranks/trophyroad/rank2.png": {
+      "hash": "e819e30670699bc6",
+      "size": 46578
+    },
+    "assets/icons/ranks/trophyroad/rank3.png": {
+      "hash": "8a94a909eb6901fa",
+      "size": 47136
+    },
+    "assets/icons/ranks/trophyroad/rank4.png": {
+      "hash": "45d011fe3d8e2c95",
+      "size": 43516
+    },
+    "assets/icons/ranks/trophyroad/rank5.png": {
+      "hash": "0b104346e0a2cc86",
+      "size": 50553
+    },
+    "assets/icons/ranks/trophyroad/rank6.png": {
+      "hash": "08495c57cf893ddc",
+      "size": 53585
+    },
+    "assets/logos/logo-apex-arena.png": {
+      "hash": "d6c46b274cc59983",
+      "size": 565911
+    },
+    "assets/logos/logo-apple.png": {
+      "hash": "b9874a9d2687074f",
+      "size": 5774
+    },
+    "assets/logos/logo-google.png": {
+      "hash": "cc30a73d1fd3653f",
+      "size": 20103
+    },
+    "assets/logos/logo-guests.png": {
+      "hash": "d276685e67dbc64f",
+      "size": 14281
+    },
+    "assets/logos/logo-mail.png": {
+      "hash": "b2bc93e8a6f4b50f",
+      "size": 39447
+    },
+    "assets/logos/logo-microsoft.png": {
+      "hash": "436e3e8312deb479",
+      "size": 3064
+    },
+    "assets/maps/bounty.png": {
+      "hash": "af7a5ee8516d1518",
+      "size": 6239
+    },
+    "assets/maps/football.png": {
+      "hash": "f1c614b2db3701d9",
+      "size": 4271
+    },
+    "assets/maps/gemgrab.png": {
+      "hash": "301fa9bf5fadd7b2",
+      "size": 5895
+    },
+    "assets/maps/knockout.png": {
+      "hash": "050837344669f323",
+      "size": 5956
+    },
+    "assets/maps/showdown.png": {
+      "hash": "4b3aa4f9957bc04b",
+      "size": 7006
+    }
+  }
+}
