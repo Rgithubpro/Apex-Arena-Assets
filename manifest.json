@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-18T10:58:55.207Z",
+  "generated": "2026-08-24T10:44:59.368Z",
   "bundles": {
     "assets/icons/profile-pictures.zip": {
       "hash": "d409ee30b78e1b80",
@@ -8,21 +8,29 @@
     }
   },
   "loose": {
-    "assets/backgrounds/loading-screen-no-wifi.png": {
-      "hash": "fc0572c3ee613573",
-      "size": 443835
+    "assets/backgrounds/background.png": {
+      "hash": "22a3df81df650d20",
+      "size": 353397
     },
-    "assets/fonts/Fredoka-Regular.ttf": {
-      "hash": "638482f81fcecafb",
-      "size": 157744
+    "assets/backgrounds/loading-screen-backup.png": {
+      "hash": "7d1cbed288ba1eec",
+      "size": 158743
     },
-    "assets/fonts/LilitaOne-Regular.ttf": {
-      "hash": "4444c23631884f41",
-      "size": 26828
+    "assets/backgrounds/loading.png": {
+      "hash": "560623a983a1baef",
+      "size": 331493
     },
-    "assets/fonts/LuckiestGuy-Regular.ttf": {
-      "hash": "fbe683091b0db0fa",
-      "size": 58324
+    "assets/fonts/Fredoka-Regular.woff2": {
+      "hash": "0c7e185bf1788efe",
+      "size": 85684
+    },
+    "assets/fonts/LilitaOne-Regular.woff2": {
+      "hash": "94b6ac368ef4c598",
+      "size": 11432
+    },
+    "assets/fonts/LuckiestGuy-Regular.woff2": {
+      "hash": "af2742a54754035f",
+      "size": 23768
     },
     "assets/icons/general/battlepass-normal.png": {
       "hash": "2de7eb9d5176b915",
