@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-24T10:44:59.368Z",
+  "generated": "2026-09-14T08:01:35.622Z",
   "bundles": {
     "assets/icons/profile-pictures.zip": {
       "hash": "d409ee30b78e1b80",
@@ -213,16 +213,16 @@
       "size": 565911
     },
     "assets/logos/logo-apple.png": {
-      "hash": "b9874a9d2687074f",
-      "size": 5774
+      "hash": "f5dd56780019adf0",
+      "size": 9600
     },
     "assets/logos/logo-google.png": {
       "hash": "cc30a73d1fd3653f",
       "size": 20103
     },
     "assets/logos/logo-guests.png": {
-      "hash": "d276685e67dbc64f",
-      "size": 14281
+      "hash": "7d2125d11a226fbc",
+      "size": 22282
     },
     "assets/logos/logo-mail.png": {
       "hash": "b2bc93e8a6f4b50f",
