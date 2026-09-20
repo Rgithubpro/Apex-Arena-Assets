@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-14T08:01:35.622Z",
+  "generated": "2026-09-20T09:35:01.974Z",
   "bundles": {
     "assets/icons/profile-pictures.zip": {
       "hash": "d409ee30b78e1b80",
@@ -251,6 +251,51 @@
     "assets/maps/showdown.png": {
       "hash": "4b3aa4f9957bc04b",
       "size": 7006
+    },
+    "js/data/database/database.js": {
+      "hash": "e3b0c44298fc1c14",
+      "size": 0,
+      "kind": "module"
+    },
+    "js/data/database/extra.js": {
+      "hash": "f0a888945888580f",
+      "size": 433,
+      "kind": "module"
+    },
+    "js/data/localstorage.js": {
+      "hash": "2eea317669c338c3",
+      "size": 128,
+      "kind": "module"
+    },
+    "js/pages/home.js": {
+      "hash": "e3b0c44298fc1c14",
+      "size": 0,
+      "kind": "script"
+    },
+    "js/pages/welcome.js": {
+      "hash": "1158a6e30d1a9817",
+      "size": 36388,
+      "kind": "script"
+    },
+    "html/pages/home.html": {
+      "hash": "8e3659ae74d52888",
+      "size": 12663,
+      "kind": "page",
+      "pageKey": "home"
+    },
+    "html/pages/welcome.html": {
+      "hash": "0673027cb6756152",
+      "size": 14716,
+      "kind": "page",
+      "pageKey": "welcome"
+    },
+    "css/pages/home.css": {
+      "hash": "e3b0c44298fc1c14",
+      "size": 0
+    },
+    "css/pages/welcome.css": {
+      "hash": "154c58a35c95df84",
+      "size": 39878
     }
   }
 }

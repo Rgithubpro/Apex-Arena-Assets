@@ -1,0 +1,15 @@
+{
+  "_comment": "Hand-maintained, lives in the apex-arena-assets repo, NOT the client repo. Every JS/HTML file under js/ or html/ IN THIS REPO must have an entry here, or generate-manifest.js will warn (not fail). Do NOT list cache.js/router.js/notification.js/middleware.js/loading.js here — those are core files that ship with the client repo (under js/data/ and js/pages/ there) and never live in this repo at all. CSS files need no entry — applyStyles() treats every *.css loose asset the same way. kind values: 'script' (classic <script>, runs in shared global scope, e.g. js/pages/*.js — relies on Router already existing in global scope), 'module' (real ES module with import/export, resolved via resolveModuleUrl() + import(), never batch-applied), 'page' (whole-page HTML, root element already carries its real id + class=\"page\", appended into .page-container), 'snippet' (non-page HTML fragment, appended to <body>).",
+
+  "_todo": "css/other/ and html/other/ also exist in the real repo tree but aren't classified below yet — their contents weren't available when this file was written. Add entries for whatever's in there (e.g. \"html/other/some-snippet.html\": \"snippet\").",
+
+  "js/pages/welcome.js": "script",
+  "js/pages/home.js": "script",
+
+  "js/data/database/database.js": "module",
+  "js/data/database/extra.js": "module",
+  "js/data/localstorage.js": "module",
+
+  "html/pages/welcome.html": "page",
+  "html/pages/home.html": "page"
+}

@@ -1,0 +1,189 @@
+<!-- ================================================================
+HOME  →  #home
+Root element below already carries its real id + class="page" —
+applyHTML() just appends this whole file into .page-container as-is,
+it does not assign or look up anything.
+================================================================= -->
+        <div id="home-screen" class="page">
+            <img data-asset="assets/backgrounds/background.png" alt="Home screen background" id="home-screen-background">
+            <!-- Top -->
+            <div id="home-screen-top">
+                <button id="home-screen-profile">
+                    <img data-asset="assets/icons/profile-pictures/abstract-002.svg" alt="Profile picture" id="home-screen-profile-picture">
+                    <p id="home-screen-profile-username">{username}</p>
+                </button>
+                <button id="home-screen-trophieroad">
+                    <div id="home-screen-trophieroad-count-box">
+                        <p id="home-screen-trophieroad-count">91021</p>
+                        <img data-asset="assets/icons/general/trophy.png" alt="" id="home-screen-trophieroad-count-trophie">
+                    </div>
+                    <div id="home-screen-trophieroad-progressbar">
+                        <div id="home-screen-trophieroad-progressbar-fill"></div>
+                    </div>
+                    <img data-asset="assets/icons/general/coins.png" alt="Next reward = {reward}" id="home-screen-trophieroad-next-reward">
+                    <img data-asset="assets/icons/ranks/trophyroad/rank5.png" alt="Rank: {rank}" id="home-screen-trophieroad-rank">
+                    <div id="home-screen-trophieroad-rank-substage">
+                        <p id="home-screen-trophieroad-rank-substage-text">III</p>
+                    </div>
+                </button>
+                <div id="home-screen-currencies">
+                    <button id="home-screen-currencies-gems">
+                        <p id="home-screen-currencies-gems-count">134</p>
+                        <img data-asset="assets/icons/general/gems.png" alt="Gems" id="home-screen-currencies-gems-icon">
+                    </button>
+                    <button id="home-screen-currencies-coins">
+                        <p id="home-screen-currencies-coins-count">5291</p>
+                        <img data-asset="assets/icons/general/coins.png" alt="Coins" id="home-screen-currencies-coins-icon">
+                    </button>
+                    <button id="home-screen-currencies-powerpoints">
+                        <p id="home-screen-currencies-powerpoints-count">9821</p>
+                        <img data-asset="assets/icons/general/powerpoints.png" alt="Powerpoints" id="home-screen-currencies-powerpoints-icon">
+                    </button>
+                    <button id="home-screen-currencies-crystals">
+                        <p id="home-screen-currencies-crystals-count">29512</p>
+                        <img data-asset="assets/icons/general/crystals.png" alt="Crystals" id="home-screen-currencies-crystals-icon">
+                    </button>
+                </div>
+                <button id="home-screen-settings">
+                    <img data-asset="assets/icons/general/settings.png" alt="" id="home-screen-settings-icon">
+                </button>
+            </div>
+            <!-- Left side -->
+            <div id="home-screen-left">
+                <button id="home-screen-shop">
+                    <img data-asset="assets/icons/general/shop.png" alt="" id="home-screen-shop-icon">
+                    <p id="home-screen-shop-text">Shop</p>
+                    <div id="home-screen-shop-flag">
+                        <p id="home-screen-shop-flag-text">Free</p>
+                    </div>
+                </button>
+                <button id="home-screen-battlers">
+                    <img data-asset="assets/icons/general/battlers.png" alt="" id="home-screen-battlers-icon">
+                    <p id="home-screen-battlers-text">Battlers</p>
+                    <div id="home-screen-battlers-notification">
+                        <p id="home-screen-battlers-notification-text">20</p>
+                    </div>
+                </button>
+                <button id="home-screen-unlock-brawler">
+                    <img data-asset="assets/icons/general/placeholder.png" alt="" id="home-screen-unlock-brawler-icon">
+                    <div id="home-screen-unlock-brawler-bar">
+                        <div id="home-screen-unlock-brawler-bar-fill"></div>
+                        <p id="home-screen-unlock-brawler-text">1810/3800</p>
+                    </div>
+                </button>
+            </div>
+            <!-- Right side -->
+            <div id="home-screen-right">
+                <button id="home-screen-news">
+                    <img data-asset="assets/icons/general/news.png" alt="" id="home-screen-news-icon">
+                    <p id="home-screen-news-text">News</p>
+                    <div id="home-screen-news-flag">
+                        <p id="home-screen-news-flag-text">New</p>
+                    </div>
+                </button>
+                <button id="home-screen-friends">
+                    <img data-asset="assets/icons/general/friends.png" alt="" id="home-screen-friends-icon">
+                    <p id="home-screen-friends-text">Friends</p>
+                    <div id="home-screen-friends-notification">
+                        <p id="home-screen-friends-notification-text">5</p>
+                    </div>
+                </button>
+                <button id="home-screen-club">
+                    <img data-asset="assets/icons/general/club-white.png" alt="" id="home-screen-club-icon">
+                    <p id="home-screen-club-text">Clubs</p>
+                    <div id="home-screen-club-notification">
+                        <p id="home-screen-club-notification-text">2</p>
+                    </div>
+                </button>
+                <button id="home-screen-team/chat">
+                    <img data-asset="assets/icons/general/teamup.png" alt="" id="home-screen-team-chat-icon"> <!-- can change to chat icon-->
+                    <p id="home-screen-team/chat-text">Team up!</p> <!-- can change to Chat-->
+                </button>
+            </div>
+            <!-- Center -->
+            <div id="home-screen-center">
+                <div id="home-screen-battler-trophies"> <!-- no button cause you can't click on it -->
+                    <img data-asset="assets/icons/ranks/battler/rank4.png" alt="" id="home-screen-battler-trophies-rank-icon">
+                    <p id="home-screen-battler-trophies-rank-text">II</p>
+                    <div id="home-screen-battler-trophies-progressbar">
+                        <div id="home-screen-battler-trophies-progressbar-fill"></div>
+                        <p id="home-screen-battler-trophies-progressbar-text">920</p>
+                        <img data-asset="assets/icons/general/trophy.png" alt="" id="home-screen-battler-trophies-progressbar-trophie">
+                    </div>
+                </div>
+                <button id="home-screen-battler-power-level">
+                    <img data-asset="assets/icons/general/power-flame.png" alt="" id="home-screen-battler-power-level-ultra-icon">
+                    <p id="home-screen-battler-power-level-text">9</p>
+                </button>
+                <button id="home-screen-battler-upgrades">
+                    <img data-asset="assets/icons/general/placeholder.png" alt="" id="home-screen-battler-upgrades-gear1">
+                    <img data-asset="assets/icons/general/placeholder.png" alt="" id="home-screen-battler-upgrades-gear2">
+                    <img data-asset="assets/icons/general/placeholder.png" alt="" id="home-screen-battler-upgrades-gadget">
+                    <img data-asset="assets/icons/general/placeholder.png" alt="" id="home-screen-battler-upgrades-starpower">
+                </button>
+                <button id="home-screen-battler-skins">
+                    <img data-asset="assets/icons/general/hanger.png" alt="" id="home-screen-battler-skins-icon">
+                </button>
+                <div id="home-screen-battler-render">
+                        <canvas id="home-screen-battler-render-canvas"></canvas>
+                </div>
+            </div>
+            <!-- Bottom-->
+            <div id="home-screen-bottom">
+                <button id="home-screen-battlepass">
+                    <img data-asset="assets/icons/general/battlepass-normal.png" alt="" id="home-screen-battlepass-icon">
+                    <div id="home-screen-battlepass-progressbar">
+                        <div id="home-screen-battlepass-progressbar-fill"></div>
+                        <p id="home-screen-battlepass-progressbar-text">421/950</p>
+                    </div>
+                        <img data-asset="assets/icons/general/battler-xp.png" alt="" id="home-screen-battlepass-progressbar-icon">
+                        <img data-asset="assets/icons/general/stardrop.png" alt="Next reward = {reward}" id="home-screen-battlepass-next-reward">
+                </button>
+                <button id="home-screen-quests">
+                    <img data-asset="assets/icons/general/quests.png" alt="" id="home-screen-quests-icon">
+                    <p id="home-screen-quests-text">Quests</p>
+                    <div id="home-screen-quests-flag">
+                        <p id="home-screen-quests-flag-text">New</p>
+                    </div>
+                </button>
+                <button id="home-screen-streak">
+                    <img data-asset="assets/icons/general/flame1.png" alt="" id="home-screen-streak-icon">
+                    <p id="home-screen-streak-text">5</p>
+                </button>
+                <button id="home-screen-event">
+                    <p id="home-screen-event-new-event-in">New event in: 2h 30m</p>
+                    <img data-asset="assets/icons/general/info.png" alt="" id="home-screen-event-info">
+                    <div id="home-screen-event-box">
+                        <h6 id="home-screen-event-box-gamemode">Football</h6>
+                        <p id="home-screen-event-box-map-name">Beach</p>
+                        <img data-asset="assets/maps/football.png" alt="" id="home-screen-event-box-mode-image">
+                        <div id="home-screen-event-new">
+                            <p id="home-screen-event-new-text">NEW EVENTS!</p>
+                        </div>
+                    </div>
+                </button>
+                <button id="home-screen-play">
+                    <div id="home-screen-play-rewards-bar">
+                        <div id="home-screen-play-rewards-bar-fill"></div>
+                        <!-- for now 6 seperate divs, try to make it dynamic -->
+                        <div class="home-screen-play-rewards-bar-segment" id="home-screen-play-rewards-bar-segment1"></div>
+                        <div class="home-screen-play-rewards-bar-segment" id="home-screen-play-rewards-bar-segment2"></div>
+                        <div class="home-screen-play-rewards-bar-segment" id="home-screen-play-rewards-bar-segment3"></div>
+                        <div class="home-screen-play-rewards-bar-segment" id="home-screen-play-rewards-bar-segment4"></div>
+                        <div class="home-screen-play-rewards-bar-segment" id="home-screen-play-rewards-bar-segment5"></div>
+                        <div class="home-screen-play-rewards-bar-segment" id="home-screen-play-rewards-bar-segment6"></div>
+                        <p id="home-screen-play-rewards-bar-next-text">Next rewards 5h 23m</p>
+                        <img data-asset="assets/icons/general/clock.png" id="home-screen-play-rewards-bar-next-icon">
+                    </div>
+                        <img data-asset="assets/icons/general/stardrop.png" id="home-screen-play-reward1">
+                        <img data-asset="assets/icons/general/stardrop.png" id="home-screen-play-reward2">
+                        <img data-asset="assets/icons/general/stardrop.png" id="home-screen-play-reward3">
+                        <img data-asset="assets/icons/general/stardrop.png" id="home-screen-play-reward4">
+                        <img data-asset="assets/icons/general/stardrop.png" id="home-screen-play-reward5">
+                        <img data-asset="assets/icons/general/stardrop.png" id="home-screen-play-reward6">
+                    <div id="home-screen-play-button">
+                        <h2 id="home-screen-play-button-text">Play</h2>
+                    </div>
+                </button>
+            </div>
+        </div>
