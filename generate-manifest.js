@@ -124,7 +124,7 @@ function main() {
   const manifest = {
     generated: new Date().toISOString(),
     bundles: {}, // "assets/icons/ranks/profile-pictures.zip" -> { hash, size, prefix }
-    loose: {},   // "assets/logos/logo-apple.png" -> { hash, size } | "js/pages/home.js" -> { hash, size, kind }
+    loose: {},   // "assets/logos/logo-discord.png" -> { hash, size } | "js/pages/home.js" -> { hash, size, kind }
   };
 
   let totalBytes = 0;

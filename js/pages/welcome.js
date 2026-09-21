@@ -48,7 +48,7 @@ Router.register('welcome', (() => {
 
             btnGoogle: document.getElementById('welcome-screen-login-option-google'),
             btnMicrosoft: document.getElementById('welcome-screen-login-option-microsoft'),
-            btnApple: document.getElementById('welcome-screen-login-option-apple'),
+            btnDiscord: document.getElementById('welcome-screen-login-option-discord'),
             btnEmail: document.getElementById('welcome-screen-login-option-email'),
             btnGuest: document.getElementById('welcome-screen-guest-button'),
 
@@ -203,7 +203,7 @@ Router.register('welcome', (() => {
                 <h4>2. How we use it</h4>
                 <p>Placeholder copy about matchmaking, progress saving, and anti-cheat.</p>
                 <h4>3. Sharing</h4>
-                <p>Placeholder copy about third-party services used for login (Google, Microsoft, Apple) and hosting.</p>
+                <p>Placeholder copy about third-party services used for login (Google, Microsoft, Discord) and hosting.</p>
                 <h4>4. Your choices</h4>
                 <p>Placeholder copy about data export, deletion, and cookie preferences.</p>
             `,
@@ -279,11 +279,11 @@ Router.register('welcome', (() => {
        LOG-IN CHOICE — service buttons, e-mail, guest
        ============================================================ */
     function initLogInChoice() {
-        const { btnGoogle, btnMicrosoft, btnApple, btnEmail, btnGuest } = E();
+        const { btnGoogle, btnMicrosoft, btnDiscord, btnEmail, btnGuest } = E();
 
         btnGoogle?.addEventListener('click', () => startServiceLogin('Google'));
         btnMicrosoft?.addEventListener('click', () => startServiceLogin('Microsoft'));
-        btnApple?.addEventListener('click', () => startServiceLogin('Apple'));
+        btnDiscord?.addEventListener('click', () => startServiceLogin('Discord'));
 
         btnEmail?.addEventListener('click', () => {
             goToStep('email');
@@ -295,7 +295,7 @@ Router.register('welcome', (() => {
     }
 
     /* ============================================================
-       SERVICE LOGIN STEP  (Google / Microsoft / Apple)
+    SERVICE LOGIN STEP  (Google / Microsoft / Discord)
        ============================================================ */
     function initServiceStep() {
         E().serviceBack?.addEventListener('click', () => goToStep('log-in'));
