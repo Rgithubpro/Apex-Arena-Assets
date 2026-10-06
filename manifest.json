@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-21T09:15:08.143Z",
+  "generated": "2026-10-06T12:29:52.062Z",
   "bundles": {
     "assets/icons/profile-pictures.zip": {
       "hash": "d409ee30b78e1b80",
@@ -252,24 +252,14 @@
       "hash": "4b3aa4f9957bc04b",
       "size": 7006
     },
-    "js/data/database/database.js": {
-      "hash": "e3b0c44298fc1c14",
-      "size": 0,
-      "kind": "module"
-    },
-    "js/data/database/extra.js": {
-      "hash": "f0a888945888580f",
-      "size": 433,
-      "kind": "module"
-    },
     "js/data/localstorage.js": {
-      "hash": "2eea317669c338c3",
-      "size": 128,
+      "hash": "54e1ff60667ea191",
+      "size": 127,
       "kind": "module"
     },
     "js/pages/home.js": {
-      "hash": "e3b0c44298fc1c14",
-      "size": 0,
+      "hash": "6b69269ccaecb555",
+      "size": 16782,
       "kind": "script"
     },
     "js/pages/welcome.js": {
@@ -278,20 +268,20 @@
       "kind": "script"
     },
     "html/pages/home.html": {
-      "hash": "8e3659ae74d52888",
-      "size": 12663,
+      "hash": "1bb114485bee36ea",
+      "size": 12008,
       "kind": "page",
       "pageKey": "home"
     },
     "html/pages/welcome.html": {
-      "hash": "00194747d6d3aa9b",
-      "size": 14728,
+      "hash": "c8c35843b6381d6d",
+      "size": 14553,
       "kind": "page",
       "pageKey": "welcome"
     },
     "css/pages/home.css": {
-      "hash": "e3b0c44298fc1c14",
-      "size": 0
+      "hash": "78f951bcfba80aad",
+      "size": 20398
     },
     "css/pages/welcome.css": {
       "hash": "154c58a35c95df84",
