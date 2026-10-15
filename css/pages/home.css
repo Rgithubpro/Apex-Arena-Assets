@@ -2,6 +2,11 @@
    HOME SCREEN — lobby
 ================================================================= */
 
+/* No scrolling while the home page is shown (loading.css does the same via fixed+overflow) */
+html:has(#home-screen.active), html:has(#home-screen.active) body {
+    overflow: hidden; margin: 0; overscroll-behavior: none;
+}
+
 #home-screen {
     --u: min(1vh, 0.46vw);
     --hs-l: calc(env(safe-area-inset-left, 0px) + var(--u) * 2);
@@ -10,31 +15,34 @@
     --hs-b: calc(env(safe-area-inset-bottom, 0px) + var(--u) * 1.4);
     --hs-stroke: calc(var(--u) * 0.7);
     --hs-username-color: #ff4fd8;
-    --hs-cyan: #0accee;
     --hs-panel-top: #1b3a5e;
     --hs-panel-bottom: #08182a;
 
-    overflow: hidden;
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    overflow: hidden; overscroll-behavior: none;
     background: #0b1a2e;
     font-family: 'lilita-one', sans-serif;
     color: #fff;
-    -webkit-user-select: none;
-    user-select: none;
+    -webkit-user-select: none; user-select: none;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
 }
 
-/* ---------- Shared resets ---------- */
-#home-screen img { display: block; object-fit: contain; pointer-events: none; -webkit-user-drag: none; }
-#home-screen button {
+/* ---------- Zero-specificity resets ---------- */
+:where(#home-screen) img { display: block; object-fit: contain; pointer-events: none; -webkit-user-drag: none; }
+:where(#home-screen) button {
     position: relative; margin: 0; padding: 0; border: 0; background: none;
     font: inherit; color: inherit; cursor: pointer;
-    transition: transform 0.08s ease, filter 0.08s ease;
+    transition: transform 0.14s ease, filter 0.08s ease;
 }
-#home-screen button:active { transform: scale(0.96); filter: brightness(0.9); }
-@media (hover: hover) { #home-screen button:hover { filter: brightness(1.08); } }
+/* Hover scale only where a cursor exists (no color change) */
+@media (any-hover: hover) and (any-pointer: fine) {
+    :where(#home-screen) button:hover { transform: scale(1.06); z-index: 6; }
+}
+/* Press animation everywhere (declared after hover so it wins) */
+:where(#home-screen) button:active { transform: scale(0.94); filter: brightness(0.92); }
 
-#home-screen p, #home-screen h2, #home-screen h6 {
+:where(#home-screen) :is(p, h2, h6) {
     margin: 0; font-family: 'lilita-one', sans-serif; font-weight: normal;
     color: #fff; line-height: 1; letter-spacing: 0.02em; white-space: nowrap;
     paint-order: stroke fill;
@@ -48,11 +56,14 @@
     object-fit: cover; object-position: center; z-index: 0;
 }
 #home-screen-top, #home-screen-left, #home-screen-right,
-#home-screen-bottom, #home-screen-center { position: absolute; z-index: 2; box-sizing: border-box; }
-#home-screen-center { inset: 0; z-index: 1; pointer-events: none; }
-#home-screen-center > * { pointer-events: auto; }
+#home-screen-bottom, #home-screen-center {
+    position: absolute; z-index: 2; box-sizing: border-box; pointer-events: none;
+}
+#home-screen-top > *, #home-screen-left > *, #home-screen-right > *,
+#home-screen-bottom > *, #home-screen-center > * { pointer-events: auto; }
+#home-screen-center { inset: 0; z-index: 1; }
 
-/* ---------- Dark/cyan panel button (matches welcome/loading cards) ---------- */
+/* ---------- Panel button + yellow variant ---------- */
 #home-screen .hs-btn {
     background: linear-gradient(180deg, var(--hs-panel-top) 0%, var(--hs-panel-bottom) 100%);
     border: 1px solid rgba(10, 204, 238, 0.45);
@@ -63,43 +74,58 @@
         inset 0 0 0 1px rgba(10, 204, 238, 0.12),
         inset 0 calc(var(--u) * 0.35) 0 rgba(255, 255, 255, 0.12);
 }
+#home-screen .hs-btn.hs-yellow {
+    background: linear-gradient(180deg, #ffd43b, #f5a800); border-color: #7a5200;
+    box-shadow:
+        0 calc(var(--u) * 0.55) 0 #8a5d00,
+        0 calc(var(--u) * 0.7) calc(var(--u) * 1.2) rgba(0, 0, 0, 0.45),
+        inset 0 calc(var(--u) * 0.35) 0 rgba(255, 255, 255, 0.4);
+}
 
-/* ---------- Badges + flags ---------- */
+/* ---------- Badges + flags (glowing cyan-UI pills) ---------- */
 #home-screen .hs-notif {
-    position: absolute; top: calc(var(--u) * -1.6); right: calc(var(--u) * -1.3);
+    position: absolute; top: calc(var(--u) * -2.4); right: calc(var(--u) * -2.4);
     min-width: calc(var(--u) * 4.2); height: calc(var(--u) * 4.2);
     padding: 0 calc(var(--u) * 0.7); box-sizing: border-box; border-radius: 999px;
     display: flex; align-items: center; justify-content: center; pointer-events: none;
-    background: radial-gradient(circle at 35% 30%, #5cf08a, #19b84a 70%);
-    border: calc(var(--u) * 0.35) solid #0c3a1c;
-    box-shadow: 0 calc(var(--u) * 0.3) 0 rgba(0, 0, 0, 0.4);
+    background: linear-gradient(180deg, #4df0a0, #12a560);
+    border: calc(var(--u) * 0.3) solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 calc(var(--u) * 1) rgba(40, 240, 140, 0.55), 0 calc(var(--u) * 0.3) 0 rgba(0, 0, 0, 0.4);
 }
 #home-screen .hs-notif--red {
-    background: radial-gradient(circle at 35% 30%, #ff8a8a, #e0242e 70%);
-    border-color: #4a0a10;
+    background: linear-gradient(180deg, #ff7a88, #d92b45);
+    box-shadow: 0 0 calc(var(--u) * 1) rgba(255, 85, 102, 0.6), 0 calc(var(--u) * 0.3) 0 rgba(0, 0, 0, 0.4);
 }
-#home-screen .hs-notif p { font-size: calc(var(--u) * 2.5); --hs-stroke: calc(var(--u) * 0.5); }
-#home-screen .hs-side .hs-notif { top: calc(var(--u) * -3.8); right: calc(var(--u) * -1.4); }
+#home-screen .hs-notif p { font-size: calc(var(--u) * 2.4); --hs-stroke: calc(var(--u) * 0.5); -webkit-text-stroke-color: #062a18; }
 
 #home-screen .hs-flag {
-    position: absolute; top: calc(var(--u) * -3.4); right: calc(var(--u) * -2.6);
-    padding: calc(var(--u) * 0.6) calc(var(--u) * 1.8) calc(var(--u) * 0.6) calc(var(--u) * 1.1);
-    background: linear-gradient(180deg, #ff5a5a, #d3202f);
-    clip-path: polygon(0 0, 100% 0, 88% 50%, 100% 100%, 0 100%);
-    pointer-events: none;
+    position: absolute; top: calc(var(--u) * -2.4); right: calc(var(--u) * -2.4);
+    padding: calc(var(--u) * 0.55) calc(var(--u) * 1.4); border-radius: calc(var(--u) * 1);
+    background: linear-gradient(180deg, #ff7a88, #d92b45);
+    border: calc(var(--u) * 0.3) solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 calc(var(--u) * 1) rgba(255, 85, 102, 0.6), 0 calc(var(--u) * 0.3) 0 rgba(0, 0, 0, 0.4);
+    transform: rotate(6deg); pointer-events: none;
 }
-#home-screen .hs-flag--green { background: linear-gradient(180deg, #52e56b, #1fa43a); }
-#home-screen .hs-flag p { font-size: calc(var(--u) * 1.9); text-transform: uppercase; --hs-stroke: calc(var(--u) * 0.5); }
+#home-screen .hs-flag--green {
+    background: linear-gradient(180deg, #3ff0c8, #0a9f86);
+    box-shadow: 0 0 calc(var(--u) * 1) rgba(1, 251, 200, 0.55), 0 calc(var(--u) * 0.3) 0 rgba(0, 0, 0, 0.4);
+}
+#home-screen .hs-flag p { font-size: calc(var(--u) * 1.9); text-transform: uppercase; --hs-stroke: calc(var(--u) * 0.5); -webkit-text-stroke-color: #4a0a14; }
+#home-screen .hs-flag--green p { -webkit-text-stroke-color: #04423a; }
+/* Right column = mirrored (top-left corner) */
+#home-screen-right .hs-flag, #home-screen-right .hs-notif { right: auto; left: calc(var(--u) * -2.4); }
+#home-screen-right .hs-flag { transform: rotate(-6deg); }
+#home-screen #home-screen-settings .hs-notif { top: calc(var(--u) * -1.6); right: calc(var(--u) * -1.3); }
 
 /* ---------- Side buttons (icon pops out above a short panel) ---------- */
-#home-screen .hs-side { width: calc(var(--u) * 14); height: calc(var(--u) * 7.8); }
+#home-screen .hs-side { width: calc(var(--u) * 14); height: calc(var(--u) * 8.4); }
 #home-screen .hs-side-icon {
-    position: absolute; left: 50%; bottom: calc(var(--u) * 2.6); transform: translateX(-50%);
-    height: calc(var(--u) * 7.4); width: auto; max-width: calc(var(--u) * 10);
+    position: absolute; left: 50%; bottom: calc(var(--u) * 3.9); transform: translateX(-50%);
+    height: calc(var(--u) * 6.6); width: auto; max-width: calc(var(--u) * 9.5);
 }
 #home-screen .hs-side-label {
-    position: absolute; left: 0; right: 0; bottom: calc(var(--u) * 0.7);
-    text-align: center; font-size: calc(var(--u) * 2.5); text-transform: uppercase;
+    position: absolute; left: 0; right: 0; bottom: calc(var(--u) * 0.8);
+    text-align: center; font-size: calc(var(--u) * 2.4); text-transform: uppercase;
 }
 
 /* ================================================================
@@ -112,50 +138,51 @@
 }
 
 /* Profile */
-#home-screen #home-screen-profile { width: calc(var(--u) * 19.5); height: calc(var(--u) * 12); flex: none; }
+#home-screen #home-screen-profile { width: calc(var(--u) * 16); height: calc(var(--u) * 12.5); flex: none; }
 #home-screen-profile-picture {
-    position: absolute; left: 50%; top: calc(var(--u) * 1); transform: translateX(-50%);
-    width: calc(var(--u) * 8.8); height: calc(var(--u) * 8.8);
+    position: absolute; left: 50%; top: calc(var(--u) * 0.9); transform: translateX(-50%);
+    width: calc(var(--u) * 8.6); height: calc(var(--u) * 8.6);
     border-radius: calc(var(--u) * 0.8); object-fit: cover;
 }
 #home-screen-profile-username {
-    position: absolute; left: calc(var(--u) * 0.6); right: calc(var(--u) * 0.6); bottom: calc(var(--u) * 0.6);
-    text-align: center; font-size: calc(var(--u) * 2.6); color: var(--hs-username-color);
+    position: absolute; left: calc(var(--u) * 0.5); right: calc(var(--u) * 0.5); bottom: calc(var(--u) * 0.6);
+    text-align: center; font-size: calc(var(--u) * 2.5); color: var(--hs-username-color);
     overflow: hidden; text-overflow: ellipsis;
 }
 
 /* Trophy road */
-#home-screen #home-screen-trophieroad { width: calc(var(--u) * 29); height: calc(var(--u) * 12); flex: none; }
+#home-screen #home-screen-trophieroad { width: calc(var(--u) * 29); height: calc(var(--u) * 12.5); flex: none; }
 #home-screen-trophieroad-count-box {
-    position: absolute; left: calc(var(--u) * 10.5); top: calc(var(--u) * 1.2);
-    display: flex; align-items: center; gap: calc(var(--u) * 0.6);
+    position: absolute; left: calc(var(--u) * 7.8); top: calc(var(--u) * 0.8);
+    display: flex; align-items: center; gap: calc(var(--u) * 0.4);
 }
-#home-screen-trophieroad-count { font-family: 'lilita-one-bold', sans-serif; font-size: calc(var(--u) * 4.6); color: #ffc235; }
-#home-screen-trophieroad-count-trophie { height: calc(var(--u) * 4.6); width: auto; }
+#home-screen-trophieroad-count { font-family: 'lilita-one-bold', sans-serif; font-size: calc(var(--u) * 4.2); color: #ffc235; }
+#home-screen-trophieroad-count-trophie { order: -1; height: calc(var(--u) * 4.8); width: auto; }
 #home-screen-trophieroad-progressbar {
-    position: absolute; left: calc(var(--u) * 10); right: calc(var(--u) * 6.8); top: calc(var(--u) * 7.2);
-    height: calc(var(--u) * 3.2); box-sizing: border-box; overflow: hidden; border-radius: 999px;
+    position: absolute; left: calc(var(--u) * 0.9); right: calc(var(--u) * 0.9); bottom: calc(var(--u) * 0.8);
+    height: calc(var(--u) * 2.8); box-sizing: border-box; overflow: hidden; border-radius: 999px;
     background: #0a1220; border: calc(var(--u) * 0.3) solid #050a14;
 }
 #home-screen-trophieroad-progressbar-fill,
 #home-screen-battler-trophies-progressbar-fill,
-#home-screen-unlock-brawler-bar-fill,
+#home-screen-unlock-battler-bar-fill,
 #home-screen-battlepass-progressbar-fill,
 #home-screen-play-rewards-bar-fill { height: 100%; width: 0%; border-radius: inherit; transition: width 0.3s ease-in-out; }
 #home-screen-trophieroad-progressbar-fill { background: linear-gradient(180deg, #ffa13a, #ff6a1a); }
 #home-screen-trophieroad-next-reward {
-    position: absolute; right: calc(var(--u) * 0.8); top: calc(var(--u) * 5.4); height: calc(var(--u) * 5.4); width: auto;
+    position: absolute; right: calc(var(--u) * 0.2); bottom: calc(var(--u) * 0.2);
+    height: calc(var(--u) * 5.2); width: auto;
 }
 #home-screen-trophieroad-rank {
-    position: absolute; left: calc(var(--u) * 1); top: calc(var(--u) * 1.2);
-    height: calc(var(--u) * 8); width: calc(var(--u) * 7.6);
+    position: absolute; left: calc(var(--u) * 0.9); top: calc(var(--u) * 0.7);
+    height: calc(var(--u) * 5.8); width: calc(var(--u) * 6.2);
 }
 #home-screen-trophieroad-rank-substage {
-    position: absolute; left: calc(var(--u) * 4.8); top: calc(var(--u) * 8.2); transform: translateX(-50%);
-    padding: calc(var(--u) * 0.25) calc(var(--u) * 1); border-radius: calc(var(--u) * 0.6);
+    position: absolute; left: calc(var(--u) * 4); top: calc(var(--u) * 6.6); transform: translateX(-50%);
+    padding: calc(var(--u) * 0.15) calc(var(--u) * 0.8); border-radius: calc(var(--u) * 0.5);
     background: #0a1220; border: 1px solid rgba(10, 204, 238, 0.35);
 }
-#home-screen-trophieroad-rank-substage-text { font-size: calc(var(--u) * 1.8); --hs-stroke: 0px; }
+#home-screen-trophieroad-rank-substage-text { font-size: calc(var(--u) * 1.5); --hs-stroke: 0px; }
 
 /* Currencies */
 #home-screen-currencies {
@@ -169,63 +196,61 @@
     background: rgba(5, 14, 28, 0.78); border: 1px solid rgba(10, 204, 238, 0.35);
 }
 #home-screen-currencies img {
-    order: -1; width: calc(var(--u) * 5.6); height: calc(var(--u) * 5.6); margin-left: calc(var(--u) * -0.7);
+    order: -1; width: calc(var(--u) * 5.6); height: calc(var(--u) * 5.6);
+    margin-left: calc(var(--u) * -1.8); margin-right: calc(var(--u) * 0.2);
 }
 #home-screen-currencies p { font-size: calc(var(--u) * 2.6); --hs-stroke: calc(var(--u) * 0.5); }
 
 /* Settings */
 #home-screen #home-screen-settings { width: calc(var(--u) * 10); height: calc(var(--u) * 8); flex: none; }
-#home-screen-settings-icon {
-    position: absolute; inset: 0; margin: auto; height: calc(var(--u) * 4.8); width: auto;
-}
+#home-screen-settings-icon { position: absolute; inset: 0; margin: auto; height: calc(var(--u) * 4.8); width: auto; }
 
 /* ================================================================
    LEFT / RIGHT
 ================================================================= */
 #home-screen-left {
     left: var(--hs-l); top: calc(var(--u) * 30);
-    display: flex; flex-direction: column; align-items: flex-start; gap: calc(var(--u) * 4.8);
+    display: flex; flex-direction: column; align-items: flex-start; gap: calc(var(--u) * 5);
 }
 #home-screen-right {
-    right: var(--hs-r); top: calc(var(--u) * 23);
-    display: flex; flex-direction: column; align-items: flex-end; gap: calc(var(--u) * 4.6);
+    right: var(--hs-r); top: calc(var(--u) * 20);
+    display: flex; flex-direction: column; align-items: flex-end; gap: calc(var(--u) * 5);
 }
-#home-screen #home-screen-shop {
-    background: linear-gradient(180deg, #ffd43b, #f5a800); border-color: #7a5200;
-    box-shadow: 0 calc(var(--u) * 0.55) 0 #8a5d00, 0 calc(var(--u) * 0.7) calc(var(--u) * 1.2) rgba(0, 0, 0, 0.45),
-                inset 0 calc(var(--u) * 0.35) 0 rgba(255, 255, 255, 0.4);
-}
-#home-screen #home-screen-team-chat { width: calc(var(--u) * 19); height: calc(var(--u) * 8.6); margin-top: calc(var(--u) * 1); }
+#home-screen #home-screen-team-chat { width: calc(var(--u) * 19); height: calc(var(--u) * 10.6); margin-top: calc(var(--u) * 1); }
+#home-screen #home-screen-team-chat .hs-side-icon { height: calc(var(--u) * 8.2); bottom: calc(var(--u) * 5.2); max-width: calc(var(--u) * 11); }
+#home-screen #home-screen-team-chat .hs-side-label { bottom: calc(var(--u) * 1.3); font-size: calc(var(--u) * 2.9); }
 
-/* Unlock battler */
-#home-screen #home-screen-unlock-brawler {
-    width: calc(var(--u) * 13); height: calc(var(--u) * 6.4);
-    background: none; border: 0; box-shadow: none;
+/* Unlock battler: same size as other buttons — half icon on top, bar below */
+#home-screen-unlock-battler-icon {
+    position: absolute; left: 50%; bottom: calc(var(--u) * 5.4); transform: translateX(-50%);
+    height: calc(var(--u) * 6); width: auto;
 }
-#home-screen-unlock-brawler-icon {
-    position: absolute; left: 50%; bottom: calc(var(--u) * 3.4); transform: translateX(-50%);
-    height: calc(var(--u) * 8.4); width: auto;
+#home-screen-unlock-battler-bar {
+    position: absolute; left: calc(var(--u) * 1.2); right: calc(var(--u) * 1.2); bottom: calc(var(--u) * 1);
+    height: calc(var(--u) * 3.4); box-sizing: border-box; overflow: hidden; border-radius: 999px;
+    background: #08202f; border: calc(var(--u) * 0.3) solid rgba(10, 204, 238, 0.55);
 }
-#home-screen-unlock-brawler-bar {
-    position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--u) * 4.2);
-    box-sizing: border-box; overflow: hidden; border-radius: calc(var(--u) * 0.8);
-    background: #0f2a55; border: calc(var(--u) * 0.3) solid #06142c;
+#home-screen-unlock-battler-bar-fill {
+    background: linear-gradient(180deg, #2fe0f5, #0a93b5);
+    box-shadow: inset 0 calc(var(--u) * 0.3) 0 rgba(255, 255, 255, 0.28);
 }
-#home-screen-unlock-brawler-bar-fill { background: linear-gradient(180deg, #4a9bff, #1a5fe0); }
-#home-screen-unlock-brawler-text {
+#home-screen-unlock-battler-text {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    font-size: calc(var(--u) * 2.3); --hs-stroke: calc(var(--u) * 0.5);
+    font-size: calc(var(--u) * 2); --hs-stroke: calc(var(--u) * 0.45);
 }
 
 /* ================================================================
    CENTER
 ================================================================= */
 #home-screen-battler-info {
-    position: absolute; top: calc(var(--u) * 11.5); left: 50%; transform: translateX(-50%);
-    display: flex; align-items: center; gap: calc(var(--u) * 1.2);
+    position: absolute; z-index: 3; top: calc(var(--u) * 11.5); left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: calc(var(--u) * 1.4);
 }
 #home-screen-battler-trophies { position: relative; display: flex; align-items: center; }
-#home-screen-battler-trophies-rank-icon { width: calc(var(--u) * 7); height: calc(var(--u) * 8.4); position: relative; z-index: 2; margin-right: calc(var(--u) * -1.2); }
+#home-screen-battler-trophies-rank-icon {
+    position: relative; z-index: 2; width: calc(var(--u) * 7); height: calc(var(--u) * 8.4);
+    margin-right: calc(var(--u) * 0.6);
+}
 #home-screen-battler-trophies-rank-text {
     position: absolute; left: 0; width: calc(var(--u) * 7); bottom: calc(var(--u) * 0.9); z-index: 3;
     text-align: center; font-size: calc(var(--u) * 1.9); --hs-stroke: calc(var(--u) * 0.5);
@@ -240,10 +265,11 @@
 #home-screen-battler-trophies-progressbar-trophie { position: relative; z-index: 1; order: -1; height: calc(var(--u) * 3.6); width: auto; }
 
 #home-screen-battler-power-level {
-    width: calc(var(--u) * 7.6); height: calc(var(--u) * 7.6); border-radius: 50%; flex: none;
+    position: relative; width: calc(var(--u) * 7.6); height: calc(var(--u) * 7.6); border-radius: 50%; flex: none;
     display: flex; align-items: center; justify-content: center;
     background: radial-gradient(circle at 35% 30%, #ff5be0, #a010a0 75%);
-    border: calc(var(--u) * 0.35) solid #fff; box-shadow: 0 0 0 calc(var(--u) * 0.3) #3a0a3a, 0 calc(var(--u) * 0.5) 0 rgba(0, 0, 0, 0.4);
+    border: calc(var(--u) * 0.35) solid #fff;
+    box-shadow: 0 0 0 calc(var(--u) * 0.3) #3a0a3a, 0 calc(var(--u) * 0.5) 0 rgba(0, 0, 0, 0.4);
 }
 #home-screen-battler-power-level.is-ultra { background: none; border: 0; box-shadow: none; }
 #home-screen-battler-power-level-ultra-icon { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -255,13 +281,13 @@
     background: rgba(8, 24, 42, 0.55); box-shadow: none;
 }
 #home-screen-battler-upgrades img { height: calc(var(--u) * 4.6); width: calc(var(--u) * 4.6); }
-#home-screen-battler-upgrades-gadget   { grid-area: 1 / 1; }
-#home-screen-battler-upgrades-starpower{ grid-area: 1 / 2; }
-#home-screen-battler-upgrades-gear1    { grid-area: 2 / 1; }
-#home-screen-battler-upgrades-gear2    { grid-area: 2 / 2; }
+#home-screen-battler-upgrades-gadget    { grid-area: 1 / 1; }
+#home-screen-battler-upgrades-starpower { grid-area: 1 / 2; }
+#home-screen-battler-upgrades-gear1     { grid-area: 2 / 1; }
+#home-screen-battler-upgrades-gear2     { grid-area: 2 / 2; }
 
 #home-screen #home-screen-battler-skins {
-    position: absolute; left: calc(50% - var(--u) * 27); bottom: calc(var(--u) * 24);
+    position: absolute; z-index: 3; left: calc(50% - var(--u) * 27); bottom: calc(var(--u) * 24);
     width: calc(var(--u) * 8.8); height: calc(var(--u) * 6.4);
 }
 #home-screen-battler-skins-icon { position: absolute; inset: 0; margin: auto; height: calc(var(--u) * 4.4); width: auto; }
@@ -273,7 +299,8 @@
 #home-screen-battler-render-canvas { display: block; width: 100%; height: 100%; }
 
 /* ================================================================
-   BOTTOM
+   BOTTOM  — battlepass + quests flow from the left; streak + event
+   are centered on screen; play is pinned to the bottom-right corner.
 ================================================================= */
 #home-screen-bottom {
     left: 0; right: 0; bottom: 0;
@@ -282,93 +309,117 @@
 }
 
 /* Battlepass */
-#home-screen-battlepass { width: calc(var(--u) * 28); height: calc(var(--u) * 15.5); flex: none; }
-#home-screen-battlepass-icon { position: absolute; left: calc(var(--u) * 0.5); top: 0; height: calc(var(--u) * 10.6); width: auto; }
-#home-screen-battlepass-next-reward { position: absolute; right: calc(var(--u) * 0.4); top: 0; height: calc(var(--u) * 8.6); width: auto; }
+#home-screen #home-screen-battlepass { width: calc(var(--u) * 24); height: calc(var(--u) * 8.4); flex: none; }
+#home-screen-battlepass-icon { position: absolute; left: calc(var(--u) * 0.8); bottom: calc(var(--u) * 5.2); height: calc(var(--u) * 7.4); width: auto; }
+#home-screen-battlepass-next-reward { position: absolute; right: calc(var(--u) * 1.4); bottom: calc(var(--u) * 5); height: calc(var(--u) * 7.6); width: auto; }
 #home-screen-battlepass-progressbar {
-    position: absolute; left: calc(var(--u) * 3.4); right: calc(var(--u) * 0.4); bottom: calc(var(--u) * 0.8);
-    height: calc(var(--u) * 4.4); box-sizing: border-box; overflow: hidden; border-radius: calc(var(--u) * 0.8);
+    position: absolute; left: calc(var(--u) * 2.4); right: calc(var(--u) * 0.9); bottom: calc(var(--u) * 0.9);
+    height: calc(var(--u) * 3.6); box-sizing: border-box; overflow: hidden; border-radius: calc(var(--u) * 0.8);
     background: #3a2410; border: calc(var(--u) * 0.3) solid #1a0e04;
 }
 #home-screen-battlepass-progressbar-fill { background: linear-gradient(180deg, #ffd23a, #ff9a1a); }
 #home-screen-battlepass-progressbar-text {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    padding-left: calc(var(--u) * 1.5); font-size: calc(var(--u) * 2.7); --hs-stroke: calc(var(--u) * 0.5);
+    padding-left: calc(var(--u) * 2.4); font-size: calc(var(--u) * 2.4); --hs-stroke: calc(var(--u) * 0.5);
 }
-#home-screen-battlepass-progressbar-icon { position: absolute; left: 0; bottom: 0; height: calc(var(--u) * 5.8); width: auto; }
+#home-screen-battlepass-progressbar-icon { position: absolute; left: calc(var(--u) * 0.3); bottom: calc(var(--u) * 0.2); height: calc(var(--u) * 5); width: auto; }
 
-/* Quests */
-#home-screen #home-screen-quests { flex: none; }
-
-/* Streak */
-#home-screen-streak { margin-left: auto; flex: none; width: calc(var(--u) * 10); height: calc(var(--u) * 12); }
+/* Streak (left of the centered event) */
+#home-screen-streak {
+    position: absolute; bottom: var(--hs-b); left: calc(50% - var(--u) * 42.4);
+    width: calc(var(--u) * 10); height: calc(var(--u) * 12);
+}
 #home-screen-streak-icon { position: absolute; inset: 0; width: 100%; height: 100%; }
 #home-screen-streak-text {
-    position: absolute; left: 0; right: 0; bottom: calc(var(--u) * 1.2);
-    text-align: center; font-size: calc(var(--u) * 4.4);
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    padding-top: calc(var(--u) * 1.6); font-size: calc(var(--u) * 4.4);
 }
 
-/* Event */
-#home-screen-event { flex: 0 1 calc(var(--u) * 62); min-width: calc(var(--u) * 40); height: calc(var(--u) * 14.6); }
+/* Event — centered on screen. Wrapper positions; the main button and the info button are siblings */
+#home-screen-event-wrap {
+    position: absolute; bottom: var(--hs-b); left: calc(50% - var(--u) * 31);
+    width: calc(var(--u) * 62); height: calc(var(--u) * 14.6);
+}
+#home-screen-event { position: absolute; inset: 0; }
 #home-screen-event::before {
-    content: ""; position: absolute; top: 0; left: 0; right: 0; height: calc(var(--u) * 3.8);
-    background: rgba(0, 0, 0, 0.72); border-radius: calc(var(--u) * 1) calc(var(--u) * 1) 0 0;
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: calc(var(--u) * 4.4); box-sizing: border-box;
+    background: linear-gradient(180deg, #10304d 0%, #0a2038 100%);
+    border: 1px solid rgba(10, 204, 238, 0.4); border-bottom: 0;
+    border-radius: calc(var(--u) * 1.2) calc(var(--u) * 1.2) 0 0;
+    box-shadow: inset 0 calc(var(--u) * 0.3) 0 rgba(255, 255, 255, 0.08);
 }
 #home-screen-event-new-event-in {
-    position: absolute; top: 0; right: calc(var(--u) * 6.4); height: calc(var(--u) * 3.8); line-height: calc(var(--u) * 3.8);
-    font-size: calc(var(--u) * 2); color: #9fb7d0; --hs-stroke: 0px; text-shadow: none;
+    position: absolute; top: 0; right: calc(var(--u) * 7); height: calc(var(--u) * 3.8); line-height: calc(var(--u) * 3.8);
+    font-size: calc(var(--u) * 2); color: #8fd3ea; --hs-stroke: 0px; text-shadow: none;
 }
-#home-screen-event-info { position: absolute; top: calc(var(--u) * -0.6); right: calc(var(--u) * 1); height: calc(var(--u) * 4.6); width: auto; }
+#home-screen-event-info {
+    position: absolute; top: calc(var(--u) * -2); right: calc(var(--u) * -1.4); z-index: 7; /* above the event button's hover z-index (6) */
+    width: calc(var(--u) * 4.8); height: calc(var(--u) * 4.8);
+    transition: transform 0.14s ease, translate 0.14s ease, filter 0.08s ease;
+}
+#home-screen-event-info-icon { width: 100%; height: 100%; filter: brightness(0.78); }
+/* Hovering anywhere on the event area scales the event button; the info button rides along with its corner
+   (individual `translate` property so it composes with the info button's own hover/press `transform`). */
+@media (any-hover: hover) and (any-pointer: fine) {
+    #home-screen-event-wrap:hover #home-screen-event { transform: scale(1.06); }
+    #home-screen-event-wrap:hover #home-screen-event-info { translate: calc(var(--u) * 1.7) calc(var(--u) * -0.35); }
+}
+#home-screen-event-wrap #home-screen-event:active { transform: scale(0.94); }
 #home-screen-event-box {
     position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--u) * 10.8); overflow: hidden;
-    border-radius: calc(var(--u) * 1.4); text-align: left;
-    background: linear-gradient(180deg, #1c2a44, #0e1a30); border: 1px solid rgba(10, 204, 238, 0.35);
+    border-radius: 0 0 calc(var(--u) * 1.4) calc(var(--u) * 1.4); text-align: left;
+    background: linear-gradient(180deg, #1c2a44, #0e1a30);
+    border: 1px solid rgba(10, 204, 238, 0.35); border-top: 0;
     box-shadow: 0 calc(var(--u) * 0.55) 0 #050d18;
 }
 #home-screen-event-box-mode-image { position: absolute; left: calc(var(--u) * 2.2); top: 50%; transform: translateY(-50%); width: calc(var(--u) * 7.6); height: calc(var(--u) * 7.6); }
 #home-screen-event-box-gamemode {
-    position: absolute; left: calc(var(--u) * 12); top: calc(var(--u) * 1.6);
+    position: absolute; left: calc(var(--u) * 12); top: calc(var(--u) * 1.6); max-width: calc(100% - var(--u) * 25);
     font-family: 'lilita-one-bold', sans-serif; font-size: calc(var(--u) * 4.2); text-transform: uppercase;
 }
-#home-screen-event-box-map-name { position: absolute; left: calc(var(--u) * 12); top: calc(var(--u) * 6.4); font-size: calc(var(--u) * 3.2); color: #ffb02e; }
+#home-screen-event-box-map-name { position: absolute; left: calc(var(--u) * 12); top: calc(var(--u) * 6.4); max-width: calc(100% - var(--u) * 25); font-size: calc(var(--u) * 3.2); color: #ffb02e; }
 #home-screen-event-new {
-    position: absolute; top: 0; right: 0; bottom: 0; width: calc(var(--u) * 12);
+    position: absolute; top: 0; right: 0; bottom: 0; width: calc(var(--u) * 12.5);
     display: flex; align-items: center; justify-content: center;
     background: linear-gradient(180deg, #ffd21f, #ffa800);
 }
 #home-screen-event-new-text {
-    width: calc(var(--u) * 9.6); text-align: center; white-space: normal; font-size: calc(var(--u) * 2.5);
+    width: calc(var(--u) * 10); text-align: center; white-space: normal; font-size: calc(var(--u) * 2.3);
     --hs-stroke: calc(var(--u) * 0.6); -webkit-text-stroke-color: #5a3200;
 }
 
-/* Play */
-#home-screen-play { flex: none; width: calc(var(--u) * 45); height: calc(var(--u) * 17.4); }
-#home-screen-play-rewards-bar {
-    position: absolute; top: 0; left: 0; right: 0; height: calc(var(--u) * 3.8); overflow: hidden;
-    border-radius: calc(var(--u) * 1) calc(var(--u) * 1) 0 0; background: rgba(0, 0, 0, 0.72);
-    display: flex; flex-direction: row-reverse; justify-content: flex-start; align-items: center;
-    gap: calc(var(--u) * 0.6); padding-right: calc(var(--u) * 1.2); box-sizing: border-box;
+/* Play — pinned bottom-right. #home-screen-play is just a wrapper; only the button scales. */
+#home-screen-play {
+    position: absolute; right: var(--hs-r); bottom: var(--hs-b);
+    width: calc(var(--u) * 45); height: calc(var(--u) * 17.4);
 }
-#home-screen-play-rewards-bar-fill { position: absolute; left: 0; top: 0; background: linear-gradient(90deg, #0accee, #01fbff); opacity: 0.55; border-radius: 0; }
+#home-screen-play-rewards-bar {
+    position: absolute; top: 0; left: 0; right: 0; height: calc(var(--u) * 3.8); overflow: hidden; box-sizing: border-box;
+    border-radius: calc(var(--u) * 1) calc(var(--u) * 1) 0 0;
+    background: linear-gradient(180deg, #10304d 0%, #0a2038 100%);
+    border: 1px solid rgba(10, 204, 238, 0.4); border-bottom: 0;
+    display: flex; flex-direction: row-reverse; justify-content: center; align-items: center;
+    gap: calc(var(--u) * 0.6);
+}
+#home-screen-play-rewards-bar-fill { position: absolute; left: 0; top: 0; border-radius: 0; background: linear-gradient(90deg, #6e2a05, #c8560f, #ff8c2a); }
 .home-screen-play-rewards-bar-segment {
     position: absolute; top: 0; bottom: 0; width: calc(var(--u) * 0.25);
-    left: calc(var(--k) / var(--n) * 100%); background: rgba(255, 255, 255, 0.28);
+    left: calc(var(--k) / var(--n) * 100%); background: rgba(255, 255, 255, 0.22);
 }
-#home-screen-play-rewards-bar-next-text { position: relative; font-size: calc(var(--u) * 2); color: #cfe3f5; --hs-stroke: calc(var(--u) * 0.4); }
+#home-screen-play-rewards-bar-next-text { position: relative; font-size: calc(var(--u) * 2); color: #8fd3ea; --hs-stroke: calc(var(--u) * 0.4); }
 #home-screen-play-rewards-bar-next-icon { position: relative; height: calc(var(--u) * 2.6); width: auto; }
+/* one reward at the END of each segment, hidden once reached */
 #home-screen-play > img {
     position: absolute; top: calc(var(--u) * -5.2); height: calc(var(--u) * 5.6); width: calc(var(--u) * 5.6);
-    left: calc((var(--k) - 0.5) / var(--n) * 100%); transform: translateX(-50%);
-    filter: brightness(0.55) saturate(0.6);
+    left: calc(var(--k) / var(--n) * 100% - var(--u) * 0.6); transform: translateX(-100%);
 }
-#home-screen-play > img.is-reached { filter: none; }
 #home-screen-play-button {
     position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--u) * 13.6);
     display: flex; align-items: center; justify-content: center;
     border-radius: 0 0 calc(var(--u) * 1.6) calc(var(--u) * 1.6);
-    background: linear-gradient(180deg, #ffe83a 0%, #ffc61a 100%);
-    box-shadow: 0 calc(var(--u) * 0.6) 0 #a8780a, 0 0 calc(var(--u) * 2) rgba(255, 210, 30, 0.35),
-                inset 0 calc(var(--u) * 0.5) 0 rgba(255, 255, 255, 0.4);
+    background: linear-gradient(45deg, #e09300 0%, #fbc21b 100%);
+    box-shadow: 0 calc(var(--u) * 0.6) 0 #8a5a00, 0 0 calc(var(--u) * 2) rgba(255, 190, 30, 0.3),
+                inset 0 calc(var(--u) * 0.5) 0 rgba(255, 255, 255, 0.35);
 }
 #home-screen-play-button-text {
     font-family: 'lilita-one-bold', sans-serif; font-size: calc(var(--u) * 7.6); text-transform: uppercase;

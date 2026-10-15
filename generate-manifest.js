@@ -197,7 +197,7 @@ function main() {
   }
 
   console.log(`\nNext: commit manifest.json (and any changed assets/js/html/css), then push/tag this version.`);
-  console.log(`Remember: the branch/tag name you push as must match the value in your Supabase`);
+  console.log(`Remember: the branch/tag name you push as must match the value in your Turso database`);
   console.log(`general-data table's "game_version" row (currently used as the jsDelivr @version).`);
 }
 

@@ -8,7 +8,7 @@ const HOME_CONFIG = {
     player: {
         enabled: true,
         username: 'Player',
-        usernameColor: '#ff4fd8',
+        usernameColor: '#ff4fd8',   // name text always shrinks to fit its box
         profilePicture: 'assets/icons/profile-pictures/abstract-002.svg',
     },
     trophyRoad: {
@@ -32,12 +32,13 @@ const HOME_CONFIG = {
     },
     settings: {
         enabled: true,
-        notification: { enabled: false, count: 2 },      // red badge (see 2nd reference image)
+        notification: { enabled: false, count: 2 },
     },
 
     // ---------- LEFT ----------
     shop: {
         enabled: true,
+        style: 'yellow',                                 // 'yellow' | 'normal'
         flag: { enabled: true, text: 'Free' },
     },
     battlers: {
@@ -67,6 +68,7 @@ const HOME_CONFIG = {
     },
     teamChat: {
         enabled: true,
+        style: 'yellow',                                 // 'yellow' | 'normal'
         mode: 'team',                                    // 'team' | 'chat'
         team: { icon: 'assets/icons/general/teamup.png', label: 'Team up!' },
         chat: { icon: 'assets/icons/general/chat.png',   label: 'Chat' },   // ← chat.png is a guess, point at your real icon
@@ -90,12 +92,13 @@ const HOME_CONFIG = {
             starPower:{ enabled: true, icon: 'assets/icons/general/placeholder.png' },
         },
         skins:  { enabled: true },
-        render: { enabled: true },                       // the <canvas>; it is kept sized to its box (dpr-aware)
+        render: { enabled: true },                       // the <canvas>; kept sized to its box (dpr-aware)
     },
 
     // ---------- BOTTOM ----------
     battlepass: {
         enabled: true,
+        style: 'normal',                                 // 'yellow' | 'normal'
         icon: 'assets/icons/general/battlepass-normal.png',
         xp: 421,
         xpGoal: 950,
@@ -103,6 +106,7 @@ const HOME_CONFIG = {
     },
     quests: {
         enabled: true,
+        style: 'normal',                                 // 'yellow' | 'normal'
         flag: { enabled: true, text: 'New' },
     },
     streak: {
@@ -125,23 +129,27 @@ const HOME_CONFIG = {
         rewards: {
             enabled: true,
             icon: 'assets/icons/general/stardrop.png',
-            total: 6,                                    // 1–6 (HTML has 6 slots)
-            progress: 3.4,                               // in rewards; 3.4 = 3 reached + 40% into the 4th
-            nextInSeconds: 19380,                        // null hides the timer text, counts down live
+            total: 6,                                    // 1–6 slots; one reward sits at the end of each segment
+            progress: 3.4,                               // in rewards: 3.4 = 3 reached (hidden) + 40% into the 4th
+            nextInSeconds: 19380,                        // shown ONLY when progress >= total (bar complete); null = hide strip then
             nextText: 'Next rewards {time}',
             showClock: true,
         },
     },
 
     // ---------- CLICK ACTIONS ----------
-    // value = a page name (→ Router.go(name)) or a function. null = nothing happens.
+    // value = a Router page name (see router.js `pages`) or a function. null = nothing happens.
+    // Navigation goes through Router.go(), so allowedTransitions are enforced by the router, and
+    // run() also refuses pages whose <id>-screen element isn't in the DOM yet (no blank screens).
     actions: {
-        profile: null, trophyRoad: null, gems: null, coins: null, powerpoints: null, crystals: null,
-        settings: null, shop: null, battlers: null, unlockBattler: null,
-        news: null, friends: null, club: null, teamChat: null,
-        powerLevel: null, upgrades: null, skins: null,
-        battlepass: null, quests: null, streak: null, event: null,
-        play: () => console.log('[home] play pressed'),
+        profile: 'profile', trophyRoad: 'trophieroad', gems: null, coins: null, powerpoints: null, crystals: null,
+        settings: 'settings', shop: 'shop', battlers: 'battlers', unlockBattler: 'unlock-battler',
+        news: 'news', friends: 'friends', club: 'club',
+        teamChat: null,                                  // router has no team/chat page yet
+        skins: 'battler',
+        battlepass: 'battlepass', quests: 'quests', streak: null,
+        event: 'events', eventInfo: null,
+        play: 'matchmaking',
     },
 };
 
@@ -150,17 +158,19 @@ Router.register('home', (() => {
     const ACTION_TARGETS = {
         profile: 'profile', trophyRoad: 'trophieroad', gems: 'currencies-gems', coins: 'currencies-coins',
         powerpoints: 'currencies-powerpoints', crystals: 'currencies-crystals', settings: 'settings',
-        shop: 'shop', battlers: 'battlers', unlockBattler: 'unlock-brawler', news: 'news', friends: 'friends',
-        club: 'club', teamChat: 'team-chat', powerLevel: 'battler-power-level', upgrades: 'battler-upgrades',
-        skins: 'battler-skins', battlepass: 'battlepass', quests: 'quests', streak: 'streak',
-        event: 'event', play: 'play',
+        shop: 'shop', battlers: 'battlers', unlockBattler: 'unlock-battler', news: 'news', friends: 'friends',
+        club: 'club', teamChat: 'team-chat', skins: 'battler-skins', battlepass: 'battlepass', quests: 'quests',
+        streak: 'streak', event: 'event', eventInfo: 'event-info', play: 'play-button',
     };
+    const FIT_IDS = ['profile-username', 'event-box-gamemode', 'event-box-map-name'];
 
+    let running = false;
     let intervalId = null;
     let resizeObserver = null;
     let assetsDirty = false;
     let eventEndAt = null;
     let rewardsEndAt = null;
+    let rewardsComplete = false;
     let bound = [];
 
     // ---------- helpers (all lookups are lazy, nothing runs at parse time) ----------
@@ -178,6 +188,7 @@ Router.register('home', (() => {
     const setShown = (id, on) => { const e = el(id); if (e) e.hidden = !on; return !!on; };
     const setFill = (id, ratio) => { const e = el(id); if (e) e.style.width = clamp01(ratio) * 100 + '%'; };
     const setAlt = (id, t) => { const e = el(id); if (e) e.alt = t; };
+    const setVariant = (id, style) => { const e = el(id); if (e) e.classList.toggle('hs-yellow', style === 'yellow'); };
     const setAsset = (id, path) => {
         const e = el(id);
         if (e && path && e.getAttribute('data-asset') !== path) { e.setAttribute('data-asset', path); assetsDirty = true; }
@@ -190,6 +201,16 @@ Router.register('home', (() => {
         if (setShown(base, !!(cfg && cfg.enabled))) setText(base + '-text', cfg.text);
     };
 
+    // Shrinks a text element's font until it fits its box (re-run on every resize).
+    function fitText(e) {
+        if (!e) return;
+        e.style.fontSize = '';
+        const cw = e.clientWidth, sw = e.scrollWidth;
+        if (!cw || sw <= cw) return;
+        e.style.fontSize = (parseFloat(getComputedStyle(e).fontSize) * (cw / sw) * 0.96) + 'px';
+    }
+    const fitAll = () => FIT_IDS.forEach((id) => fitText(el(id)));
+
     // ---------- apply config → DOM ----------
     function applyConfig() {
         assetsDirty = false;
@@ -198,7 +219,7 @@ Router.register('home', (() => {
         // Top
         if (setShown('profile', c.player.enabled)) {
             setText('profile-username', c.player.username);
-            el('profile').parentElement.parentElement.style.setProperty('--hs-username-color', c.player.usernameColor);
+            el('profile-username').style.setProperty('--hs-username-color', c.player.usernameColor);
             setAsset('profile-picture', c.player.profilePicture);
         }
         const tr = c.trophyRoad;
@@ -225,13 +246,13 @@ Router.register('home', (() => {
         if (setShown('settings', c.settings.enabled)) setBadge('settings-notification', c.settings.notification);
 
         // Left
-        if (setShown('shop', c.shop.enabled)) setFlag('shop-flag', c.shop.flag);
+        if (setShown('shop', c.shop.enabled)) { setVariant('shop', c.shop.style); setFlag('shop-flag', c.shop.flag); }
         if (setShown('battlers', c.battlers.enabled)) setBadge('battlers-notification', c.battlers.notification);
         const ub = c.unlockBattler;
-        if (setShown('unlock-brawler', ub.enabled)) {
-            setAsset('unlock-brawler-icon', ub.icon);
-            setText('unlock-brawler-text', `${fmtNum(ub.current)}/${fmtNum(ub.goal)}`);
-            setFill('unlock-brawler-bar-fill', ub.current / ub.goal);
+        if (setShown('unlock-battler', ub.enabled)) {
+            setAsset('unlock-battler-icon', ub.icon);
+            setText('unlock-battler-text', `${fmtNum(ub.current)}/${fmtNum(ub.goal)}`);
+            setFill('unlock-battler-bar-fill', ub.current / ub.goal);
         }
 
         // Right
@@ -243,6 +264,7 @@ Router.register('home', (() => {
         }
         const tc = c.teamChat, tcm = tc.mode === 'chat' ? tc.chat : tc.team;
         if (setShown('team-chat', tc.enabled)) {
+            setVariant('team-chat', tc.style);
             setAsset('team-chat-icon', tcm.icon);
             setText('team-chat-text', tcm.label);
         }
@@ -271,6 +293,7 @@ Router.register('home', (() => {
         // Bottom
         const bp = c.battlepass;
         if (setShown('battlepass', bp.enabled)) {
+            setVariant('battlepass', bp.style);
             setAsset('battlepass-icon', bp.icon);
             setText('battlepass-progressbar-text', `${fmtNum(bp.xp)}/${fmtNum(bp.xpGoal)}`);
             setFill('battlepass-progressbar-fill', bp.xp / bp.xpGoal);
@@ -279,13 +302,13 @@ Router.register('home', (() => {
                 setAlt('battlepass-next-reward', `Next reward = ${bp.nextReward.name}`);
             }
         }
-        if (setShown('quests', c.quests.enabled)) setFlag('quests-flag', c.quests.flag);
+        if (setShown('quests', c.quests.enabled)) { setVariant('quests', c.quests.style); setFlag('quests-flag', c.quests.flag); }
         if (setShown('streak', c.streak.enabled)) {
             setAsset('streak-icon', c.streak.icon);
             setText('streak-text', c.streak.count);
         }
         const ev = c.event;
-        if (setShown('event', ev.enabled)) {
+        if (setShown('event-wrap', ev.enabled)) {
             setText('event-box-gamemode', ev.gamemode);
             setText('event-box-map-name', ev.mapName);
             setAsset('event-box-mode-image', ev.image);
@@ -300,26 +323,32 @@ Router.register('home', (() => {
 
         // Re-resolve cached asset URLs for anything whose data-asset changed.
         if (assetsDirty && typeof applyAssetAttributes === 'function') applyAssetAttributes(document.getElementById('home-screen'));
+        fitAll();
     }
 
+    // Rewards bar: one reward at the end of each segment; a reached reward disappears.
+    // Once progress >= total the bar + rewards are hidden and only "Next rewards in …" remains.
     function applyRewards(r) {
         const total = Math.min(6, Math.max(1, Math.floor(r.total) || 1));
-        const play = el('play');
-        play.style.setProperty('--n', total);
-        setShown('play-rewards-bar', r.enabled);
-        setShown('play-rewards-bar-next-icon', r.enabled && r.showClock);
+        const reached = Math.floor(r.progress);
+        rewardsComplete = r.enabled && r.progress >= total;
+        const hasTimer = r.nextInSeconds != null;
+        el('play').style.setProperty('--n', total);
+
+        setShown('play-rewards-bar', r.enabled && (!rewardsComplete || hasTimer));
+        setShown('play-rewards-bar-fill', !rewardsComplete);
         setFill('play-rewards-bar-fill', r.progress / total);
         for (let i = 1; i <= 6; i++) {
             const seg = el('play-rewards-bar-segment' + i), icon = el('play-reward' + i);
             seg.style.setProperty('--k', i);
             icon.style.setProperty('--k', i);
-            seg.hidden = !(r.enabled && i < total);          // dividers only between slots
-            icon.hidden = !(r.enabled && i <= total);
-            icon.classList.toggle('is-reached', i <= Math.floor(r.progress));
+            seg.hidden = !(r.enabled && !rewardsComplete && i < total);
+            icon.hidden = !(r.enabled && !rewardsComplete && i <= total && i > reached);
             setAsset('play-reward' + i, r.icon);
         }
-        setShown('play-rewards-bar-next-text', r.enabled && r.nextInSeconds != null);
-        rewardsEndAt = r.enabled && r.nextInSeconds != null ? Date.now() + r.nextInSeconds * 1000 : null;
+        setShown('play-rewards-bar-next-text', rewardsComplete && hasTimer);
+        setShown('play-rewards-bar-next-icon', rewardsComplete && hasTimer && r.showClock);
+        rewardsEndAt = rewardsComplete && hasTimer ? Date.now() + r.nextInSeconds * 1000 : null;
     }
 
     // ---------- live countdowns ----------
@@ -328,7 +357,7 @@ Router.register('home', (() => {
         if (rewardsEndAt != null) setText('play-rewards-bar-next-text', C.play.rewards.nextText.replace('{time}', fmtTime((rewardsEndAt - Date.now()) / 1000)));
     }
 
-    // ---------- canvas ----------
+    // ---------- resize: canvas + text fitting ----------
     function fitCanvas() {
         const cv = el('battler-render-canvas');
         if (!cv) return;
@@ -337,11 +366,15 @@ Router.register('home', (() => {
         if (cv.width !== w) cv.width = w;
         if (cv.height !== h) cv.height = h;
     }
+    function onResize() { fitCanvas(); fitAll(); }
 
     // ---------- clicks ----------
     function run(action) {
-        if (typeof action === 'function') action();
-        else if (typeof action === 'string') Router.go(action);
+        if (typeof action === 'function') return action();
+        if (typeof action !== 'string') return;
+        if (!Router.exists(action)) return console.warn(`[home] "${action}" is not a router page`);
+        if (!document.getElementById(action + '-screen')) return console.warn(`[home] page "${action}" is not built yet`);
+        Router.go(action);   // router validates allowedTransitions
     }
     function bindActions() {
         for (const [key, id] of Object.entries(ACTION_TARGETS)) {
@@ -355,22 +388,26 @@ Router.register('home', (() => {
 
     return {
         start() {
+            running = true;
             applyConfig();
             tick();
             intervalId = setInterval(tick, 1000);
             bindActions();
-            fitCanvas();
-            const box = el('battler-render');
-            if (box && typeof ResizeObserver !== 'undefined') {
-                resizeObserver = new ResizeObserver(fitCanvas);
-                resizeObserver.observe(box);
-            } else window.addEventListener('resize', fitCanvas);
+            onResize();
+            const root = document.getElementById('home-screen');
+            if (root && typeof ResizeObserver !== 'undefined') {
+                resizeObserver = new ResizeObserver(onResize);
+                resizeObserver.observe(root);
+            } else window.addEventListener('resize', onResize);
+            // The custom font may finish loading after start → re-fit once it has.
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (running) fitAll(); });
         },
         stop() {
+            running = false;
             clearInterval(intervalId);
             intervalId = null;
             if (resizeObserver) { resizeObserver.disconnect(); resizeObserver = null; }
-            window.removeEventListener('resize', fitCanvas);
+            window.removeEventListener('resize', onResize);
             for (const [e, h] of bound) e.removeEventListener('click', h);
             bound = [];
         }

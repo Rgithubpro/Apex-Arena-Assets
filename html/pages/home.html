@@ -66,11 +66,11 @@ HOME  →  #home
                 <p id="home-screen-battlers-notification-text">20</p>
             </div>
         </button>
-        <button id="home-screen-unlock-brawler" class="hs-btn">
-            <img data-asset="assets/icons/general/placeholder.png" alt="" id="home-screen-unlock-brawler-icon">
-            <div id="home-screen-unlock-brawler-bar">
-                <div id="home-screen-unlock-brawler-bar-fill"></div>
-                <p id="home-screen-unlock-brawler-text">1810/3800</p>
+        <button id="home-screen-unlock-battler" class="hs-btn hs-side">
+            <img data-asset="assets/icons/general/placeholder.png" alt="" id="home-screen-unlock-battler-icon">
+            <div id="home-screen-unlock-battler-bar">
+                <div id="home-screen-unlock-battler-bar-fill"></div>
+                <p id="home-screen-unlock-battler-text">1810/3800</p>
             </div>
         </button>
     </div>
@@ -116,16 +116,16 @@ HOME  →  #home
                     <img data-asset="assets/icons/general/trophy.png" alt="" id="home-screen-battler-trophies-progressbar-trophie">
                 </div>
             </div>
-            <button id="home-screen-battler-power-level">
+            <div id="home-screen-battler-power-level">
                 <img data-asset="assets/icons/general/power-flame.png" alt="" id="home-screen-battler-power-level-ultra-icon" hidden>
                 <p id="home-screen-battler-power-level-text">9</p>
-            </button>
-            <button id="home-screen-battler-upgrades" class="hs-btn">
+            </div>
+            <div id="home-screen-battler-upgrades" class="hs-btn">
                 <img data-asset="assets/icons/general/placeholder.png" alt="" id="home-screen-battler-upgrades-gear1">
                 <img data-asset="assets/icons/general/placeholder.png" alt="" id="home-screen-battler-upgrades-gear2">
                 <img data-asset="assets/icons/general/placeholder.png" alt="" id="home-screen-battler-upgrades-gadget">
                 <img data-asset="assets/icons/general/placeholder.png" alt="" id="home-screen-battler-upgrades-starpower">
-            </button>
+            </div>
         </div>
         <button id="home-screen-battler-skins" class="hs-btn">
             <img data-asset="assets/icons/general/hanger.png" alt="" id="home-screen-battler-skins-icon">
@@ -137,7 +137,7 @@ HOME  →  #home
 
     <!-- Bottom -->
     <div id="home-screen-bottom">
-        <button id="home-screen-battlepass">
+        <button id="home-screen-battlepass" class="hs-btn">
             <img data-asset="assets/icons/general/battlepass-normal.png" alt="" id="home-screen-battlepass-icon">
             <div id="home-screen-battlepass-progressbar">
                 <div id="home-screen-battlepass-progressbar-fill"></div>
@@ -157,19 +157,25 @@ HOME  →  #home
             <img data-asset="assets/icons/general/flame1.png" alt="" id="home-screen-streak-icon">
             <p id="home-screen-streak-text">5</p>
         </button>
-        <button id="home-screen-event">
-            <p id="home-screen-event-new-event-in">New event in: 2h 30m</p>
-            <img data-asset="assets/icons/general/info.png" alt="" id="home-screen-event-info">
-            <div id="home-screen-event-box">
-                <h6 id="home-screen-event-box-gamemode">Football</h6>
-                <p id="home-screen-event-box-map-name">Beach</p>
-                <img data-asset="assets/maps/football.png" alt="" id="home-screen-event-box-mode-image">
-                <div id="home-screen-event-new">
-                    <p id="home-screen-event-new-text">NEW EVENTS!</p>
+        <!-- wrapper only positions things: the info button can't live inside the event button -->
+        <div id="home-screen-event-wrap">
+            <button id="home-screen-event">
+                <p id="home-screen-event-new-event-in">New event in: 2h 30m</p>
+                <div id="home-screen-event-box">
+                    <h6 id="home-screen-event-box-gamemode">Football</h6>
+                    <p id="home-screen-event-box-map-name">Beach</p>
+                    <img data-asset="assets/maps/football.png" alt="" id="home-screen-event-box-mode-image">
+                    <div id="home-screen-event-new">
+                        <p id="home-screen-event-new-text">NEW EVENTS!</p>
+                    </div>
                 </div>
-            </div>
-        </button>
-        <button id="home-screen-play">
+            </button>
+            <button id="home-screen-event-info">
+                <img data-asset="assets/icons/general/info.png" alt="Event info" id="home-screen-event-info-icon">
+            </button>
+        </div>
+        <!-- wrapper (not a button): only #home-screen-play-button reacts to hover/press -->
+        <div id="home-screen-play">
             <div id="home-screen-play-rewards-bar">
                 <div id="home-screen-play-rewards-bar-fill"></div>
                 <!-- 6 segments max; home.js hides the unused ones (config play.rewards.total, 1–6) -->
@@ -188,9 +194,9 @@ HOME  →  #home
             <img data-asset="assets/icons/general/stardrop.png" alt="" id="home-screen-play-reward4">
             <img data-asset="assets/icons/general/stardrop.png" alt="" id="home-screen-play-reward5">
             <img data-asset="assets/icons/general/stardrop.png" alt="" id="home-screen-play-reward6">
-            <div id="home-screen-play-button">
+            <button id="home-screen-play-button">
                 <h2 id="home-screen-play-button-text">Play</h2>
-            </div>
-        </button>
+            </button>
+        </div>
     </div>
 </div>

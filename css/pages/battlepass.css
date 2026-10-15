@@ -1,0 +1,29 @@
+#battlepass-screen {
+    position: fixed; inset: 0; overflow: hidden;
+    background: #0b1a2e; color: #fff; font-family: 'lilita-one', sans-serif;
+}
+#battlepass-screen-background { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#battlepass-screen-back-button {
+    position: absolute; top: max(1rem, env(safe-area-inset-top)); left: max(1rem, env(safe-area-inset-left));
+    padding: 0.7rem 1.2rem; border: 1px solid rgba(10, 204, 238, 0.55); border-radius: 0.75rem;
+    background: linear-gradient(180deg, #1b3a5e, #08182a); box-shadow: 0 4px 0 #050d18, 0 6px 14px rgba(0, 0, 0, 0.4);
+    color: inherit; font: inherit; font-size: clamp(1rem, 2.5vmin, 1.5rem); cursor: pointer;
+}
+#battlepass-screen-back-button:focus-visible { outline: 3px solid #01fbff; outline-offset: 3px; }
+#battlepass-screen-back-button:active { transform: translateY(2px); box-shadow: 0 2px 0 #050d18, 0 3px 8px rgba(0, 0, 0, 0.4); }
+#battlepass-screen-title {
+    position: absolute; z-index: 2; top: 18vh; left: 1rem; right: 1rem;
+    margin: 0; text-align: center; font-size: clamp(2rem, 6vmin, 4rem);
+    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.75);
+}
+#battlepass-screen-actions {
+    position: absolute; z-index: 2; left: 50%; bottom: max(2rem, env(safe-area-inset-bottom));
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;
+    width: min(92vw, 50rem); transform: translateX(-50%);
+}
+#battlepass-screen-actions button:not(#battlepass-screen-back-button) {
+    padding: 0.8rem 1.4rem; border: 1px solid rgba(10, 204, 238, 0.55); border-radius: 0.75rem;
+    background: linear-gradient(180deg, #1b3a5e, #08182a); box-shadow: 0 4px 0 #050d18, 0 6px 14px rgba(0, 0, 0, 0.4);
+    color: #fff; font: inherit; font-size: clamp(1rem, 2.5vmin, 1.5rem); cursor: pointer;
+}
+#battlepass-screen-actions button:not(#battlepass-screen-back-button):focus-visible { outline: 3px solid #01fbff; outline-offset: 3px; }

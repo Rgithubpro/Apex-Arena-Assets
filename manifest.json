@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-06T12:29:52.062Z",
+  "generated": "2026-10-15T17:04:16.275Z",
   "bundles": {
     "assets/icons/profile-pictures.zip": {
       "hash": "d409ee30b78e1b80",
@@ -257,9 +257,94 @@
       "size": 127,
       "kind": "module"
     },
+    "js/pages/battlepass.js": {
+      "hash": "ecfa8226c03806a7",
+      "size": 581,
+      "kind": "script"
+    },
+    "js/pages/battler.js": {
+      "hash": "edc5ddf119714242",
+      "size": 575,
+      "kind": "script"
+    },
+    "js/pages/battlers.js": {
+      "hash": "6eeddf33b45fba77",
+      "size": 577,
+      "kind": "script"
+    },
+    "js/pages/club.js": {
+      "hash": "fca88d9740d75f27",
+      "size": 418,
+      "kind": "script"
+    },
+    "js/pages/events.js": {
+      "hash": "d59f1f79ff4895a2",
+      "size": 422,
+      "kind": "script"
+    },
+    "js/pages/friend-profile.js": {
+      "hash": "f02e5df4e1f3597e",
+      "size": 589,
+      "kind": "script"
+    },
+    "js/pages/friends.js": {
+      "hash": "5f88c9c073a107d8",
+      "size": 575,
+      "kind": "script"
+    },
     "js/pages/home.js": {
-      "hash": "6b69269ccaecb555",
-      "size": 16782,
+      "hash": "b27d59d7999783b9",
+      "size": 19298,
+      "kind": "script"
+    },
+    "js/pages/match-results.js": {
+      "hash": "53d4e1a312c0e202",
+      "size": 436,
+      "kind": "script"
+    },
+    "js/pages/match.js": {
+      "hash": "2a576b6cdb70b913",
+      "size": 571,
+      "kind": "script"
+    },
+    "js/pages/matchmaking.js": {
+      "hash": "00adbc818fcbbdee",
+      "size": 583,
+      "kind": "script"
+    },
+    "js/pages/news.js": {
+      "hash": "eeea9667caf5ef51",
+      "size": 418,
+      "kind": "script"
+    },
+    "js/pages/profile.js": {
+      "hash": "1cfbe3689d9c7580",
+      "size": 594,
+      "kind": "script"
+    },
+    "js/pages/quests.js": {
+      "hash": "f84b0f4f14f7e8e8",
+      "size": 573,
+      "kind": "script"
+    },
+    "js/pages/settings.js": {
+      "hash": "4227a434a0528601",
+      "size": 426,
+      "kind": "script"
+    },
+    "js/pages/shop.js": {
+      "hash": "f7cc823e2fd3108a",
+      "size": 418,
+      "kind": "script"
+    },
+    "js/pages/trophieroad.js": {
+      "hash": "899ba40e09bb6a91",
+      "size": 432,
+      "kind": "script"
+    },
+    "js/pages/unlock-battler.js": {
+      "hash": "e15f5c67434e72d1",
+      "size": 589,
       "kind": "script"
     },
     "js/pages/welcome.js": {
@@ -267,11 +352,113 @@
       "size": 36399,
       "kind": "script"
     },
+    "html/pages/battlepass.html": {
+      "hash": "39ad5719766c4e88",
+      "size": 480,
+      "kind": "page",
+      "pageKey": "battlepass"
+    },
+    "html/pages/battler.html": {
+      "hash": "1351b97b61a0fa9c",
+      "size": 460,
+      "kind": "page",
+      "pageKey": "battler"
+    },
+    "html/pages/battlers.html": {
+      "hash": "13b9c006de9ef119",
+      "size": 547,
+      "kind": "page",
+      "pageKey": "battlers"
+    },
+    "html/pages/club.html": {
+      "hash": "602b2e34ac673cfa",
+      "size": 234,
+      "kind": "page",
+      "pageKey": "club"
+    },
+    "html/pages/events.html": {
+      "hash": "24d9495e1e7aa297",
+      "size": 240,
+      "kind": "page",
+      "pageKey": "events"
+    },
+    "html/pages/friend-profile.html": {
+      "hash": "40129403033e107d",
+      "size": 503,
+      "kind": "page",
+      "pageKey": "friend-profile"
+    },
+    "html/pages/friends.html": {
+      "hash": "3946fc755cfb2988",
+      "size": 465,
+      "kind": "page",
+      "pageKey": "friends"
+    },
     "html/pages/home.html": {
-      "hash": "1bb114485bee36ea",
-      "size": 12008,
+      "hash": "a2e41656a4cca80a",
+      "size": 12402,
       "kind": "page",
       "pageKey": "home"
+    },
+    "html/pages/match-results.html": {
+      "hash": "11217aad21d220e3",
+      "size": 261,
+      "kind": "page",
+      "pageKey": "match-results"
+    },
+    "html/pages/match.html": {
+      "hash": "f20830f1197cb537",
+      "size": 330,
+      "kind": "page",
+      "pageKey": "match"
+    },
+    "html/pages/matchmaking.html": {
+      "hash": "b4c01d50b748ceec",
+      "size": 485,
+      "kind": "page",
+      "pageKey": "matchmaking"
+    },
+    "html/pages/news.html": {
+      "hash": "ff607cc20e2c765f",
+      "size": 234,
+      "kind": "page",
+      "pageKey": "news"
+    },
+    "html/pages/profile.html": {
+      "hash": "8b74d1d7a66d12bb",
+      "size": 243,
+      "kind": "page",
+      "pageKey": "profile"
+    },
+    "html/pages/quests.html": {
+      "hash": "83a007f93cd1b388",
+      "size": 458,
+      "kind": "page",
+      "pageKey": "quests"
+    },
+    "html/pages/settings.html": {
+      "hash": "bd0ce989f9a52abf",
+      "size": 246,
+      "kind": "page",
+      "pageKey": "settings"
+    },
+    "html/pages/shop.html": {
+      "hash": "7764890e4cb82887",
+      "size": 234,
+      "kind": "page",
+      "pageKey": "shop"
+    },
+    "html/pages/trophieroad.html": {
+      "hash": "ad1fac871e71b2a6",
+      "size": 255,
+      "kind": "page",
+      "pageKey": "trophieroad"
+    },
+    "html/pages/unlock-battler.html": {
+      "hash": "d5a794e83fe1e5aa",
+      "size": 501,
+      "kind": "page",
+      "pageKey": "unlock-battler"
     },
     "html/pages/welcome.html": {
       "hash": "c8c35843b6381d6d",
@@ -279,9 +466,77 @@
       "kind": "page",
       "pageKey": "welcome"
     },
+    "css/pages/battlepass.css": {
+      "hash": "fca45a21031d36f1",
+      "size": 1932
+    },
+    "css/pages/battler.css": {
+      "hash": "e70888e1a7f96d3e",
+      "size": 1899
+    },
+    "css/pages/battlers.css": {
+      "hash": "eea2ba33a1563fb7",
+      "size": 1910
+    },
+    "css/pages/club.css": {
+      "hash": "76825820beb964f6",
+      "size": 909
+    },
+    "css/pages/events.css": {
+      "hash": "2f49cf0f5cf5b806",
+      "size": 919
+    },
+    "css/pages/friend-profile.css": {
+      "hash": "550a50e0014d5d4e",
+      "size": 1976
+    },
+    "css/pages/friends.css": {
+      "hash": "b99d3316dab738a5",
+      "size": 1899
+    },
     "css/pages/home.css": {
-      "hash": "78f951bcfba80aad",
-      "size": 20398
+      "hash": "4b92351b648b8d7f",
+      "size": 23895
+    },
+    "css/pages/match-results.css": {
+      "hash": "90ad1583c0779dc0",
+      "size": 954
+    },
+    "css/pages/match.css": {
+      "hash": "869352b4db61437c",
+      "size": 1948
+    },
+    "css/pages/matchmaking.css": {
+      "hash": "e93de96f40796ee6",
+      "size": 2154
+    },
+    "css/pages/news.css": {
+      "hash": "b04dbc5a4e50c180",
+      "size": 909
+    },
+    "css/pages/profile.css": {
+      "hash": "e486a9d33dce227f",
+      "size": 1012
+    },
+    "css/pages/quests.css": {
+      "hash": "fdef329149b235bf",
+      "size": 1888
+    },
+    "css/pages/settings.css": {
+      "hash": "38490f996a2f84e0",
+      "size": 929
+    },
+    "css/pages/shop.css": {
+      "hash": "8e4d04c74420df56",
+      "size": 909
+    },
+    "css/pages/trophieroad.css": {
+      "hash": "968203e3208c987f",
+      "size": 944
+    },
+    "css/pages/unlock-battler.css": {
+      "hash": "fc402dd762340290",
+      "size": 1976
     },
     "css/pages/welcome.css": {
       "hash": "154c58a35c95df84",
