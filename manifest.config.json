@@ -23,7 +23,7 @@
   "js/pages/friend-profile.js": "script",
   "js/pages/club.js": "script",
 
-  "js/data/localstorage.js": "module",
+  "js/data/auth.js": "module",
 
   "html/pages/welcome.html": "page",
   "html/pages/home.html": "page",

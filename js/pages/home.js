@@ -218,7 +218,7 @@ Router.register('home', (() => {
 
         // Top
         if (setShown('profile', c.player.enabled)) {
-            setText('profile-username', c.player.username);
+            setText('profile-username', window.Auth?.user?.username || c.player.username);
             el('profile-username').style.setProperty('--hs-username-color', c.player.usernameColor);
             setAsset('profile-picture', c.player.profilePicture);
         }

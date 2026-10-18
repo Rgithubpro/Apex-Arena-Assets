@@ -965,6 +965,33 @@ button:disabled {
     filter: grayscale(0.6) brightness(0.7);
 }
 
+/* Username field — only shown to Google / Microsoft / Discord players, who pick
+   their name on this step. It reuses .ws-input-wrap / .ws-field-hint, so it
+   already matches the e-mail forms; these rules only add what is specific here. */
+#welcome-screen-disclaimer-username-wrap {
+    margin-top: 0.2rem;
+}
+#welcome-screen-disclaimer-username-wrap input {
+    text-align: center;
+}
+/* green / red outline while typing (the input itself has no border) */
+#welcome-screen-disclaimer-username-wrap:has(input.ws-valid) {
+    border-color: #35e08a;
+    box-shadow: 0 0 0 3px rgba(53, 224, 138, 0.13);
+}
+#welcome-screen-disclaimer-username-wrap:has(input.ws-invalid) {
+    border-color: #ff5566;
+    box-shadow: 0 0 0 3px rgba(255, 85, 102, 0.15);
+}
+/* the hint line under the field: centred, and gone while the field is hidden */
+#welcome-screen-disclaimer-username-wrap + .ws-field-hint {
+    text-align: center;
+    justify-content: center;
+}
+#welcome-screen-disclaimer-username-wrap[style*="none"] + .ws-field-hint {
+    display: none;
+}
+
 /* ================================================================
    WELCOME BACK  →  #welcome-screen-welcome-back
 ================================================================= */

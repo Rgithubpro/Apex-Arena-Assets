@@ -144,6 +144,10 @@ WELCOME  →  #welcome
                 <div class="ws-card">
                     <h1 id="welcome-screen-disclaimer-title" class="ws-card-title">Welcome to Apex-Arena!</h1>
                     <h2 id="welcome-screen-disclaimer-subtitle">We hope you have a great time!</h2>
+                    <!-- Only shown to Google / Microsoft / Discord players who still have to pick a username -->
+                    <div class="ws-input-wrap" id="welcome-screen-disclaimer-username-wrap" style="display:none">
+                        <input type="text" id="welcome-screen-disclaimer-username" placeholder="Choose a username" maxlength="16" autocomplete="username" autocapitalize="off" spellcheck="false">
+                    </div>
                     <p id="welcome-screen-disclaimer-txt">But first you have to agree to our <a href="javascript:void(0);" id="welcome-screen-terms-link">Terms of Service</a> and <a href="javascript:void(0);" id="welcome-screen-privacy-link">Privacy Policy</a>.</p>
                     <div class="ws-checkbox-row">
                         <input type="checkbox" id="welcome-screen-disclaimer-accept">

@@ -11,3 +11,33 @@
 }
 #settings-screen-back-button:focus-visible { outline: 3px solid #01fbff; outline-offset: 3px; }
 #settings-screen-back-button:active { transform: translateY(2px); box-shadow: 0 2px 0 #050d18, 0 3px 8px rgba(0, 0, 0, 0.4); }
+
+/* ---- Account section: log out (accounts) / delete (guests) ---- */
+#settings-screen-account {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(90vw, 360px);
+    display: flex; flex-direction: column; align-items: center; gap: 0.8rem;
+    text-align: center;
+}
+#settings-screen-account-name {
+    margin: 0; font-size: clamp(1rem, 2.4vmin, 1.4rem); opacity: 0.9;
+    text-shadow: 0 0 0.1em rgba(0, 0, 0, 0.7);
+}
+#settings-screen-logout-button,
+#settings-screen-delete-button {
+    width: 100%; padding: 0.7rem 1.2rem; border: 1px solid rgba(10, 204, 238, 0.55); border-radius: 0.75rem;
+    background: linear-gradient(180deg, #1b3a5e, #08182a); box-shadow: 0 4px 0 #050d18, 0 6px 14px rgba(0, 0, 0, 0.4);
+    color: inherit; font: inherit; font-size: clamp(1rem, 2.5vmin, 1.5rem); cursor: pointer;
+}
+#settings-screen-delete-button {
+    border-color: rgba(255, 85, 102, 0.7);
+    background: linear-gradient(180deg, #6a1f30, #2a0812);
+}
+#settings-screen-logout-button:focus-visible,
+#settings-screen-delete-button:focus-visible { outline: 3px solid #01fbff; outline-offset: 3px; }
+#settings-screen-logout-button:active,
+#settings-screen-delete-button:active { transform: translateY(2px); box-shadow: 0 2px 0 #050d18, 0 3px 8px rgba(0, 0, 0, 0.4); }
+#settings-screen-account-note {
+    margin: 0; min-height: 1.2em; color: #ff8a94;
+    font-size: clamp(0.85rem, 1.9vmin, 1.1rem);
+}

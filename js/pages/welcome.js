@@ -88,6 +88,8 @@ Router.register('welcome', (() => {
             disclaimerButton: document.getElementById('welcome-screen-disclaimer-button'),
             termsLink: document.getElementById('welcome-screen-terms-link'),
             privacyLink: document.getElementById('welcome-screen-privacy-link'),
+            disclaimerUsernameWrap: document.getElementById('welcome-screen-disclaimer-username-wrap'),
+            disclaimerUsername: document.getElementById('welcome-screen-disclaimer-username'),
 
             welcomeBackBack: document.getElementById('welcome-screen-welcome-back-back'),
             welcomeBackTitle: document.getElementById('welcome-screen-welcome-back-title'),
@@ -290,6 +292,9 @@ Router.register('welcome', (() => {
         });
 
         btnGuest?.addEventListener('click', () => {
+            guestPreviewName = window.Auth.previewGuestName();
+            const { guestUsername } = E();
+            if (guestUsername) guestUsername.textContent = guestPreviewName;
             goToStep('guest-signup');
         });
     }
@@ -301,29 +306,73 @@ Router.register('welcome', (() => {
         E().serviceBack?.addEventListener('click', () => goToStep('log-in'));
     }
 
+    /* ---------- Auth glue: connects this page to js/data/auth.js (window.Auth) ---------- */
+    let guestPreviewName = '';
+    let disclaimerNeedsUsername = false;
+    let disclaimerUsernameOk = false;
+
+    function authMessage(err) {
+        if (err?.code === 'provider_not_configured') return 'That login isn\u2019t available yet.';
+        return err?.message || 'Something went wrong. Please try again.';
+    }
+
+    function authErrorToast(code) {
+        if (code === 'access_denied') return 'Login cancelled.';
+        if (code === 'provider_error') return 'Login failed. Please try again.';
+        if (code === 'account_banned') return 'This account is banned.';
+        if (code === 'server_unreachable') return 'Can\u2019t reach the server. Check your connection.';
+        return null;
+    }
+
+    function updateDisclaimerButton() {
+        const { disclaimerCheckbox, disclaimerButton } = E();
+        if (!disclaimerButton) return;
+        disclaimerButton.disabled = !(disclaimerCheckbox?.checked && (!disclaimerNeedsUsername || disclaimerUsernameOk));
+    }
+
+    /** Shows the terms step; provider logins also get a "choose a username" field here. */
+    function prepareDisclaimer(user) {
+        const { disclaimerUsernameWrap, disclaimerUsername } = E();
+        disclaimerNeedsUsername = !user?.username;
+        disclaimerUsernameOk = false;
+        if (disclaimerUsernameWrap) disclaimerUsernameWrap.style.display = disclaimerNeedsUsername ? '' : 'none';
+        if (disclaimerUsername) disclaimerUsername.value = '';
+        updateDisclaimerButton();
+    }
+
+    /** Where to go once someone is logged in. */
+    function finishAuthenticated(user) {
+        const { route } = window.Auth.routeFor(user);
+        if (route === 'username' || route === 'terms') {
+            prepareDisclaimer(user);
+            goToStep('disclaimer');
+        } else {
+            prepareWelcomeBack(user.username);
+            goToStep('welcome-back');
+        }
+    }
+
+    const PROVIDER_IDS = { Google: 'google', Microsoft: 'microsoft', Discord: 'discord' };
+
     async function startServiceLogin(providerName) {
         const { serviceTitle, serviceSubtitle } = E();
         goToStep('service');
 
-        if (serviceTitle) serviceTitle.textContent = `Connecting to ${providerName}…`;
-        if (serviceSubtitle) serviceSubtitle.textContent = 'This is a placeholder — real sign-in will happen here once the backend is connected.';
+        if (serviceTitle) serviceTitle.textContent = `Connecting to ${providerName}\u2026`;
+        if (serviceSubtitle) serviceSubtitle.textContent = 'Opening the sign-in page\u2026';
 
-        // Simulated round trip to the auth provider / our backend.
-        await sleep(1100);
-
-        const returning = getDevReturning();
-        if (serviceTitle) serviceTitle.textContent = returning ? 'Welcome back!' : 'Account connected';
-        if (serviceSubtitle) serviceSubtitle.textContent = returning
-            ? 'Taking you back into Apex Arena'
-            : 'Just one more step before you jump in';
-
-        await sleep(500);
-
-        if (returning) {
-            prepareWelcomeBack(providerName);
-            goToStep('welcome-back');
-        } else {
-            goToStep('disclaimer');
+        const onWaking = () => {
+            if (serviceSubtitle) serviceSubtitle.textContent = 'Waking up the server \u2014 this can take up to a minute\u2026';
+        };
+        window.addEventListener('auth:waking', onWaking);
+        try {
+            // On success the browser leaves this page; the provider sends the player back to it.
+            await window.Auth.startOAuth(PROVIDER_IDS[providerName]);
+        } catch (err) {
+            window.Notify?.small?.(authMessage(err), 3000);
+            goToStep('log-in');
+        } finally {
+            window.removeEventListener('auth:waking', onWaking);
         }
     }
 
@@ -443,14 +492,15 @@ Router.register('welcome', (() => {
 
             loginButton.classList.add('ws-btn-working');
             loginButton.disabled = true;
-            await sleep(900); // placeholder for real auth call
-
-            loginButton.classList.remove('ws-btn-working');
-            loginButton.disabled = false;
-
-            // E-mail login is always the "coming back" branch per the flow.
-            prepareWelcomeBack(loginEmail.value.trim());
-            goToStep('welcome-back');
+            try {
+                const user = await window.Auth.loginEmail({ email: loginEmail.value.trim(), password: loginPassword.value });
+                finishAuthenticated(user);
+            } catch (err) {
+                window.Notify?.small?.(authMessage(err), 2800);
+            } finally {
+                loginButton.classList.remove('ws-btn-working');
+                loginButton.disabled = false;
+            }
         });
     }
 
@@ -493,11 +543,17 @@ Router.register('welcome', (() => {
                 if (myToken !== usernameCheckToken) return; // stale
                 await sleep(500);
                 if (myToken !== usernameCheckToken) return;
-                // Placeholder rule: pretend "admin"/"guest" are taken.
-                const taken = ['admin', 'guest', 'apexarena'].includes(val.toLowerCase());
-                signupUsername.classList.toggle('ws-valid', !taken);
-                signupUsername.classList.toggle('ws-invalid', taken);
-                setHint(usernameHint, taken ? 'bad' : 'ok', taken ? 'Username is taken' : 'Username is available');
+                try {
+                    const res = await window.Auth.checkUsername(val);
+                    if (myToken !== usernameCheckToken) return;
+                    const taken = !res.available;
+                    signupUsername.classList.toggle('ws-valid', !taken);
+                    signupUsername.classList.toggle('ws-invalid', taken);
+                    setHint(usernameHint, taken ? 'bad' : 'ok', taken ? (['reserved_username', 'blocked_username'].includes(res.reason) ? 'That username is not allowed' : 'Username is taken') : 'Username is available');
+                } catch {
+                    // Server unreachable: the real check still happens when the form is submitted.
+                    if (myToken === usernameCheckToken) setHint(usernameHint, null, '');
+                }
             }, 250);
         });
 
@@ -526,10 +582,16 @@ Router.register('welcome', (() => {
                 if (myToken !== emailCheckToken) return;
                 await sleep(500);
                 if (myToken !== emailCheckToken) return;
-                const taken = val.toLowerCase() === 'test@apexarena.com';
-                signupEmail.classList.toggle('ws-valid', !taken);
-                signupEmail.classList.toggle('ws-invalid', taken);
-                setHint(emailHint, taken ? 'bad' : 'ok', taken ? 'An account already uses this e-mail' : '');
+                try {
+                    const res = await window.Auth.checkEmail(val);
+                    if (myToken !== emailCheckToken) return;
+                    const taken = !res.available;
+                    signupEmail.classList.toggle('ws-valid', !taken);
+                    signupEmail.classList.toggle('ws-invalid', taken);
+                    setHint(emailHint, taken ? 'bad' : 'ok', taken ? 'An account already uses this e-mail' : '');
+                } catch {
+                    if (myToken === emailCheckToken) setHint(emailHint, null, '');
+                }
             }, 250);
         });
 
@@ -574,13 +636,30 @@ Router.register('welcome', (() => {
 
             signupButton.classList.add('ws-btn-working');
             signupButton.disabled = true;
-            await sleep(900); // placeholder for real signup call
-
-            signupButton.classList.remove('ws-btn-working');
-            signupButton.disabled = false;
-
-            // Signup is always the "first time" branch → ToS.
-            goToStep('disclaimer');
+            try {
+                const user = await window.Auth.signupEmail({
+                    username: signupUsername.value.trim(),
+                    email: signupEmail.value.trim(),
+                    password: signupPassword.value,
+                });
+                finishAuthenticated(user); // new account -> terms
+            } catch (err) {
+                if (err.code === 'username_taken') {
+                    signupUsername.classList.add('ws-invalid');
+                    setHint(usernameHint, 'bad', 'Username is taken');
+                } else if (['blocked_username', 'reserved_username', 'invalid_username'].includes(err.code)) {
+                    signupUsername.classList.add('ws-invalid');
+                    setHint(usernameHint, 'bad', 'That username is not allowed');
+                } else if (err.code === 'email_taken') {
+                    signupEmail.classList.add('ws-invalid');
+                    setHint(emailHint, 'bad', 'An account already uses this e-mail');
+                } else {
+                    window.Notify?.small?.(authMessage(err), 2800);
+                }
+            } finally {
+                signupButton.classList.remove('ws-btn-working');
+                signupButton.disabled = false;
+            }
         });
     }
 
@@ -597,12 +676,16 @@ Router.register('welcome', (() => {
             if (guestContinue.classList.contains('ws-btn-working')) return;
             guestContinue.classList.add('ws-btn-working');
             guestContinue.disabled = true;
-            await sleep(600); // placeholder for guest session creation
-            guestContinue.classList.remove('ws-btn-working');
-            guestContinue.disabled = false;
-
-            // Guest always goes through the disclaimer ("Always" arrow).
-            goToStep('disclaimer');
+            try {
+                // New guest -> terms. A guest returning on the same device -> "welcome back".
+                const user = await window.Auth.guest(guestPreviewName || window.Auth.previewGuestName());
+                finishAuthenticated(user);
+            } catch (err) {
+                window.Notify?.small?.(authMessage(err), 3200);
+            } finally {
+                guestContinue.classList.remove('ws-btn-working');
+                guestContinue.disabled = false;
+            }
         });
     }
 
@@ -615,19 +698,72 @@ Router.register('welcome', (() => {
         disclaimerBack?.addEventListener('click', () => goToStep('log-in'));
 
         disclaimerButton.disabled = true;
-        disclaimerCheckbox?.addEventListener('change', () => {
-            disclaimerButton.disabled = !disclaimerCheckbox.checked;
+        disclaimerCheckbox?.addEventListener('change', updateDisclaimerButton);
+
+        // Google / Microsoft / Discord players pick their username on this step.
+        const { disclaimerUsername, disclaimerUsernameWrap } = E();
+        const nameHint = disclaimerUsernameWrap ? addHint(disclaimerUsernameWrap) : null;
+        let nameToken = 0;
+        disclaimerUsername?.addEventListener('input', () => {
+            const val = disclaimerUsername.value.trim();
+            const myToken = ++nameToken;
+            disclaimerUsernameOk = false;
+            updateDisclaimerButton();
+
+            if (!val) {
+                disclaimerUsername.classList.remove('ws-valid', 'ws-invalid');
+                setHint(nameHint, null, '');
+                return;
+            }
+            if (!USERNAME_RE.test(val)) {
+                disclaimerUsername.classList.add('ws-invalid');
+                disclaimerUsername.classList.remove('ws-valid');
+                setHint(nameHint, 'bad', '3\u201316 characters: letters, numbers, underscore');
+                return;
+            }
+            disclaimerUsername.classList.remove('ws-invalid', 'ws-valid');
+            setHint(nameHint, 'checking', 'Checking availability\u2026');
+
+            setTimeout(async () => {
+                if (myToken !== nameToken) return;
+                await sleep(500);
+                if (myToken !== nameToken) return;
+                try {
+                    const res = await window.Auth.checkUsername(val);
+                    if (myToken !== nameToken) return;
+                    disclaimerUsernameOk = !!res.available;
+                    disclaimerUsername.classList.toggle('ws-valid', disclaimerUsernameOk);
+                    disclaimerUsername.classList.toggle('ws-invalid', !disclaimerUsernameOk);
+                    setHint(nameHint, disclaimerUsernameOk ? 'ok' : 'bad', disclaimerUsernameOk ? 'Username is available' : (['reserved_username', 'blocked_username'].includes(res.reason) ? 'That username is not allowed' : 'Username is taken'));
+                } catch {
+                    if (myToken === nameToken) setHint(nameHint, null, '');
+                }
+                updateDisclaimerButton();
+            }, 250);
         });
 
         termsLink?.addEventListener('click', () => openPolicy('terms'));
         privacyLink?.addEventListener('click', () => openPolicy('privacy'));
 
         disclaimerButton?.addEventListener('click', async () => {
-            if (!disclaimerCheckbox.checked || disclaimerButton.classList.contains('ws-btn-working')) return;
+            if (disclaimerButton.disabled || disclaimerButton.classList.contains('ws-btn-working')) return;
             disclaimerButton.classList.add('ws-btn-working');
-            await sleep(500); // placeholder for account finalization
-            disclaimerButton.classList.remove('ws-btn-working');
-            enterHome();
+            try {
+                if (disclaimerNeedsUsername) {
+                    await window.Auth.setUsername(E().disclaimerUsername.value.trim());
+                    disclaimerNeedsUsername = false;
+                }
+                await window.Auth.acceptTerms();
+                enterHome();
+            } catch (err) {
+                if (['username_taken', 'reserved_username', 'blocked_username', 'invalid_username'].includes(err.code)) {
+                    disclaimerUsernameOk = false;
+                    updateDisclaimerButton();
+                }
+                window.Notify?.small?.(authMessage(err), 3000);
+            } finally {
+                disclaimerButton.classList.remove('ws-btn-working');
+            }
         });
     }
 
@@ -804,6 +940,19 @@ Router.register('welcome', (() => {
             }
 
             initNetworkCanvas();
+
+            // loading.js stores what Auth.init() found (returning from Google/Microsoft/Discord,
+            // a half-finished signup, or an error to show).
+            const authInit = window.__authInit;
+            window.__authInit = null;
+            if (authInit?.error) {
+                const toast = authErrorToast(authInit.error);
+                if (toast) window.Notify?.small?.(toast, 3000);
+            }
+            if (authInit && (authInit.route === 'username' || authInit.route === 'terms')) {
+                prepareDisclaimer(authInit.user);
+                goToStep('disclaimer');
+            }
 
             if (IS_DEV) {
                 window.Notify?.small?.('Dev mode: assets are loaded directly from the sibling assets folder, not the Cache API.', 2000);
