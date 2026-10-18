@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-15T17:04:16.275Z",
+  "generated": "2026-10-18T15:15:58.354Z",
   "bundles": {
     "assets/icons/profile-pictures.zip": {
       "hash": "d409ee30b78e1b80",
@@ -252,9 +252,9 @@
       "hash": "4b3aa4f9957bc04b",
       "size": 7006
     },
-    "js/data/localstorage.js": {
-      "hash": "54e1ff60667ea191",
-      "size": 127,
+    "js/data/auth.js": {
+      "hash": "68475f4f24ba2453",
+      "size": 15272,
       "kind": "module"
     },
     "js/pages/battlepass.js": {
@@ -293,8 +293,8 @@
       "kind": "script"
     },
     "js/pages/home.js": {
-      "hash": "b27d59d7999783b9",
-      "size": 19298,
+      "hash": "cd513081fab1a276",
+      "size": 19329,
       "kind": "script"
     },
     "js/pages/match-results.js": {
@@ -328,8 +328,8 @@
       "kind": "script"
     },
     "js/pages/settings.js": {
-      "hash": "4227a434a0528601",
-      "size": 426,
+      "hash": "a4478d5b7bc1824e",
+      "size": 3011,
       "kind": "script"
     },
     "js/pages/shop.js": {
@@ -348,8 +348,8 @@
       "kind": "script"
     },
     "js/pages/welcome.js": {
-      "hash": "144100cf679a496a",
-      "size": 36399,
+      "hash": "4c68c6a83dc286f7",
+      "size": 44041,
       "kind": "script"
     },
     "html/pages/battlepass.html": {
@@ -437,8 +437,8 @@
       "pageKey": "quests"
     },
     "html/pages/settings.html": {
-      "hash": "bd0ce989f9a52abf",
-      "size": 246,
+      "hash": "714d56ef06c483f8",
+      "size": 587,
       "kind": "page",
       "pageKey": "settings"
     },
@@ -461,8 +461,8 @@
       "pageKey": "unlock-battler"
     },
     "html/pages/welcome.html": {
-      "hash": "c8c35843b6381d6d",
-      "size": 14553,
+      "hash": "81820f5643c39c8f",
+      "size": 15003,
       "kind": "page",
       "pageKey": "welcome"
     },
@@ -523,8 +523,8 @@
       "size": 1888
     },
     "css/pages/settings.css": {
-      "hash": "38490f996a2f84e0",
-      "size": 929
+      "hash": "2a7af2d81f6debc3",
+      "size": 2357
     },
     "css/pages/shop.css": {
       "hash": "8e4d04c74420df56",
@@ -539,8 +539,8 @@
       "size": 1976
     },
     "css/pages/welcome.css": {
-      "hash": "154c58a35c95df84",
-      "size": 39878
+      "hash": "b3793abefb987119",
+      "size": 40921
     }
   }
 }
