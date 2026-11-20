@@ -1,32 +1,31 @@
 # Apex Arena Assets
 
-Apex Arena's static web assets and downloadable content repository. It contains the page markup, styles, scripts, images, fonts, maps, logos, icons, and profile-picture bundle used by the game.
+Assets and downloadable content used by [Apex Arena](https://github.com/Rgithubpro/Apex-Arena).
+
+This repository contains the project's static content, including images, fonts, maps, icons, profile-picture bundles, page markup, styles, scripts, and generated download manifests.
+
+- **Main project:** https://github.com/Rgithubpro/Apex-Arena
+- **Database server:** https://github.com/Rgithubpro/Apex-Arena-Database-Server
+- **Authentication server:** https://github.com/Rgithubpro/Apex-Arena-Auth-Server
 
 ## Repository layout
 
-- `assets/` - Images, fonts, maps, logos, icons, and bundled profile pictures
-- `html/pages/` - Page markup
-- `css/pages/` - Page styles
-- `js/pages/` - Page scripts
-- `js/data/` - Shared data modules
-- `manifest.json` - Generated hashes and sizes used to identify and download content
-- `manifest.config.json` - Classifies JavaScript and HTML entries for the game client
-- `generate-manifest.js` - Generates `manifest.json`
+- `assets/` — Images, fonts, maps, logos, icons, and asset bundles
+- `html/pages/` — Page markup
+- `css/pages/` — Page styles
+- `js/pages/` — Page scripts
+- `js/data/` — Shared data modules
+- `manifest.json` — Generated content hashes and download sizes
+- `manifest.config.json` — JavaScript and HTML manifest configuration
+- `generate-manifest.js` — Manifest generator
 
 ## Updating assets
 
-1. Add or modify files under `assets/`, `html/`, `css/`, or `js/`.
-2. If you add JavaScript or HTML, add the relative path and its kind to `manifest.config.json`.
-3. Regenerate the manifest:
-
-   ```bash
-   node generate-manifest.js
-   ```
-
-4. Commit the changed content together with `manifest.json`.
-
-ZIP files under `assets/` are represented as bundles in the manifest. Loose files are listed individually.
+1. Add or modify files in `assets/`, `html/`, `css/`, or `js/`.
+2. Add JavaScript or HTML entries to `manifest.config.json` when necessary.
+3. Run `node generate-manifest.js`.
+4. Commit the changed assets together with `manifest.json`.
 
 ## License
 
-See [LICENCE](LICENCE). The project and its source code are copyrighted and all rights reserved; permission is required to reproduce or modify it.
+See [LICENCE](LICENCE). All rights reserved.
