@@ -37,6 +37,13 @@
 #settings-screen-delete-button:focus-visible { outline: 3px solid #01fbff; outline-offset: 3px; }
 #settings-screen-logout-button:active,
 #settings-screen-delete-button:active { transform: translateY(2px); box-shadow: 0 2px 0 #050d18, 0 3px 8px rgba(0, 0, 0, 0.4); }
+#settings-screen-delete-password {
+    width: 100%; box-sizing: border-box; padding: 0.7rem 1.2rem; border-radius: 0.75rem;
+    border: 1px solid rgba(255, 85, 102, 0.5); background: #08182a; color: #fff;
+    font: inherit; font-size: clamp(1rem, 2.3vmin, 1.3rem); text-align: center;
+}
+#settings-screen-delete-password::placeholder { color: rgba(255, 255, 255, 0.45); }
+#settings-screen-delete-password:focus-visible { outline: 3px solid #01fbff; outline-offset: 3px; }
 #settings-screen-account-note {
     margin: 0; min-height: 1.2em; color: #ff8a94;
     font-size: clamp(0.85rem, 1.9vmin, 1.1rem);

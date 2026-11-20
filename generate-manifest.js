@@ -67,7 +67,7 @@ const JS_ROOT = path.join(__dirname, 'js');
 const HTML_ROOT = path.join(__dirname, 'html');
 const CSS_ROOT = path.join(__dirname, 'css');
 const CONFIG_PATH = path.join(__dirname, 'manifest.config.json');
-const IGNORE = new Set(['.DS_Store']);
+const IGNORE = new Set(['.DS_Store', 'dev-key.js']);
 
 // ─────────────────────────────────────────────────────────────
 

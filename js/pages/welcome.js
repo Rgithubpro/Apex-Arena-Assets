@@ -9,6 +9,7 @@ Router.register('welcome', (() => {
        ============================================================ */
     let currentStep = 'log-in';
     let getAssetFn = null; // set in start() once cache.js is loaded
+    let applyAssetsFn = null; // applyAssetAttributes() from cache.js, for buttons built in JS
 
     const DEV_RETURNING_KEY = 'apex-arena-dev-returning';
 
@@ -47,7 +48,6 @@ Router.register('welcome', (() => {
             cookies: document.getElementById('welcome-screen-cookies'),
 
             btnGoogle: document.getElementById('welcome-screen-login-option-google'),
-            btnMicrosoft: document.getElementById('welcome-screen-login-option-microsoft'),
             btnDiscord: document.getElementById('welcome-screen-login-option-discord'),
             btnEmail: document.getElementById('welcome-screen-login-option-email'),
             btnGuest: document.getElementById('welcome-screen-guest-button'),
@@ -205,7 +205,7 @@ Router.register('welcome', (() => {
                 <h4>2. How we use it</h4>
                 <p>Placeholder copy about matchmaking, progress saving, and anti-cheat.</p>
                 <h4>3. Sharing</h4>
-                <p>Placeholder copy about third-party services used for login (Google, Microsoft, Discord) and hosting.</p>
+                <p>Placeholder copy about third-party services used for login (Google, Discord and others) and hosting.</p>
                 <h4>4. Your choices</h4>
                 <p>Placeholder copy about data export, deletion, and cookie preferences.</p>
             `,
@@ -281,10 +281,9 @@ Router.register('welcome', (() => {
        LOG-IN CHOICE — service buttons, e-mail, guest
        ============================================================ */
     function initLogInChoice() {
-        const { btnGoogle, btnMicrosoft, btnDiscord, btnEmail, btnGuest } = E();
+        const { btnGoogle, btnDiscord, btnEmail, btnGuest } = E();
 
         btnGoogle?.addEventListener('click', () => startServiceLogin('Google'));
-        btnMicrosoft?.addEventListener('click', () => startServiceLogin('Microsoft'));
         btnDiscord?.addEventListener('click', () => startServiceLogin('Discord'));
 
         btnEmail?.addEventListener('click', () => {
@@ -313,6 +312,7 @@ Router.register('welcome', (() => {
 
     function authMessage(err) {
         if (err?.code === 'provider_not_configured') return 'That login isn\u2019t available yet.';
+        if (err?.code === 'account_banned') return err.publicReason ? `This account is banned: ${err.publicReason}` : 'This account is banned.';
         return err?.message || 'Something went wrong. Please try again.';
     }
 
@@ -321,7 +321,7 @@ Router.register('welcome', (() => {
         if (code === 'provider_error') return 'Login failed. Please try again.';
         if (code === 'account_banned') return 'This account is banned.';
         if (code === 'server_unreachable') return 'Can\u2019t reach the server. Check your connection.';
-        return null;
+        return code ? `Couldn\u2019t log you in (${code}).` : null; // unknown problem: show its code so it can be traced
     }
 
     function updateDisclaimerButton() {
@@ -352,7 +352,79 @@ Router.register('welcome', (() => {
         }
     }
 
-    const PROVIDER_IDS = { Google: 'google', Microsoft: 'microsoft', Discord: 'discord' };
+    const PROVIDER_IDS = { Google: 'google', Discord: 'discord', GitHub: 'github', Twitch: 'twitch', Roblox: 'roblox', Steam: 'steam' };
+
+    /* ---------- "More ways to log in" drawer + "Last used" badge ---------- */
+    const MORE_PROVIDERS = [
+        { id: 'github', label: 'GitHub' },
+        { id: 'twitch', label: 'Twitch' },
+        { id: 'roblox', label: 'Roblox' },
+        { id: 'steam', label: 'Steam' },
+    ];
+    let moreWired = false;
+
+    function markLastUsed(method) {
+        document.querySelectorAll('.ws-last-used').forEach((el) => el.remove());
+        if (!method) return;
+        const target = document.querySelector(
+            `#welcome-screen-login-options [data-method="${method}"], #welcome-screen-more-options-inner [data-method="${method}"], #welcome-screen-guest-button[data-method="${method}"]`,
+        );
+        if (!target) return;
+        const badge = document.createElement('span');
+        badge.className = 'ws-last-used';
+        badge.textContent = 'Last used';
+        target.append(badge);
+    }
+
+    function setMoreOpen(open) {
+        document.getElementById('welcome-screen-more-options')?.classList.toggle('open', open);
+        const toggle = document.getElementById('welcome-screen-more-toggle');
+        toggle?.classList.toggle('open', open);
+        toggle?.setAttribute('aria-expanded', String(open));
+    }
+
+    // The extra buttons come from what the server has switched on, so adding or hiding a
+    // provider on the server (DISABLED_PROVIDERS) changes this list without touching the page.
+    async function initMoreOptions() {
+        const toggle = document.getElementById('welcome-screen-more-toggle');
+        const inner = document.getElementById('welcome-screen-more-options-inner');
+        if (!toggle || !inner) return;
+
+        const last = window.Auth.lastLoginMethod();
+        markLastUsed(last);
+
+        let enabled = [];
+        try { enabled = await window.Auth.providers(); } catch { return; } // server unreachable: no drawer
+        const extras = MORE_PROVIDERS.filter((p) => enabled.includes(p.id));
+        if (!extras.length) return;
+
+        inner.replaceChildren(...extras.map(({ id, label }) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'welcome-screen-login-option';
+            btn.dataset.method = id;
+            const text = document.createElement('p');
+            text.textContent = `Continue with ${label}`;
+            // Same place and naming as the other logos: assets/logos/logo-<provider>.png
+            const icon = document.createElement('img');
+            icon.className = 'welcome-screen-login-option-icon';
+            icon.alt = `${label} logo`;
+            icon.dataset.asset = `assets/logos/logo-${id}.png`;
+            btn.append(icon, text);
+            btn.addEventListener('click', () => startServiceLogin(label));
+            return btn;
+        }));
+        // Logos are normal assets: resolve them through the cache like every other [data-asset].
+        try { await applyAssetsFn?.(inner); } catch { /* ignore */ }
+        inner.querySelectorAll('img:not([src])').forEach((img) => img.remove()); // logo not uploaded yet: text-only button
+        toggle.hidden = false;
+        if (!moreWired) {
+            toggle.addEventListener('click', () => setMoreOpen(!toggle.classList.contains('open')));
+            moreWired = true;
+        }
+        if (extras.some((p) => p.id === last)) setMoreOpen(true); // they used one of these last time
+        markLastUsed(last);
+    }
 
     async function startServiceLogin(providerName) {
         const { serviceTitle, serviceSubtitle } = E();
@@ -904,8 +976,9 @@ Router.register('welcome', (() => {
             // note on middlewareGet's import above for why that's
             // still valid).
             const app_base_url = new URL('./', document.baseURI);
-            const { getAsset, IS_DEV } = await import(new URL('js/data/cache.js', app_base_url).href);
+            const { getAsset, IS_DEV, applyAssetAttributes } = await import(new URL('js/data/cache.js', app_base_url).href);
             getAssetFn = getAsset;
+            applyAssetsFn = applyAssetAttributes;
 
             try {
                 await loadPolicies();
@@ -940,14 +1013,16 @@ Router.register('welcome', (() => {
             }
 
             initNetworkCanvas();
+            initMoreOptions();
 
             // loading.js stores what Auth.init() found (returning from Google/Microsoft/Discord,
             // a half-finished signup, or an error to show).
             const authInit = window.__authInit;
             window.__authInit = null;
+            if (authInit?.deleted) window.Notify?.small?.('Your account has been deleted.', 3500);
             if (authInit?.error) {
                 const toast = authErrorToast(authInit.error);
-                if (toast) window.Notify?.small?.(toast, 3000);
+                if (toast) window.Notify?.small?.(toast, 6000);
             }
             if (authInit && (authInit.route === 'username' || authInit.route === 'terms')) {
                 prepareDisclaimer(authInit.user);

@@ -1378,3 +1378,67 @@ button:disabled {
         left: 50%;
     }
 }
+/* ---- Login layout ----
+   An odd button at the end of a row spans the full width (so there is never an empty cell, whatever
+   mix of providers the server has switched on), and the guest button is a compact, centred pill. */
+#welcome-screen-login-options > .welcome-screen-login-option:last-child:nth-child(odd),
+#welcome-screen-more-options-inner > .welcome-screen-login-option:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-content: center;
+}
+#welcome-screen-guest-button {
+    width: min(100%, 26rem);
+    margin-inline: auto;
+    justify-content: center;
+}
+#welcome-screen-guest-button-copy { text-align: left; }
+
+/* ---- "More ways to log in" drawer + "Last used" badge ---- */
+.welcome-screen-login-option,
+#welcome-screen-guest-button { position: relative; }
+.ws-last-used {
+    position: absolute; top: -0.55em; right: 0.9em;
+    padding: 0.1em 0.6em; border-radius: 999px;
+    background: var(--ws-cyan-bright, #01fbff); color: #06202a;
+    font-family: 'lilita-one'; font-size: 0.62em; line-height: 1.4;
+    pointer-events: none;
+}
+#welcome-screen-more-toggle {
+    display: flex; align-items: center; justify-content: center; gap: 0.4em;
+    width: 100%; padding: 0.3rem; background: none; border: 0;
+    color: var(--ws-text); font-family: 'lilita-one'; font-size: var(--ws-font-label);
+    opacity: 0.85; cursor: pointer;
+}
+#welcome-screen-more-toggle[hidden] { display: none; }
+#welcome-screen-more-toggle span { display: inline-block; transition: transform 0.3s ease; }
+#welcome-screen-more-toggle.open span { transform: rotate(180deg); }
+
+/* Slides open AND closed: the grid row animates between 0 and its content height.
+   On closing, the buttons fade and shrink first; they are hidden from keyboard and screen
+   readers only once the animation has finished (the delayed `visibility`). */
+#welcome-screen-more-options {
+    display: grid; grid-template-rows: 0fr; width: 100%;
+    transition: grid-template-rows 0.32s ease;
+}
+#welcome-screen-more-options.open { grid-template-rows: 1fr; }
+#welcome-screen-more-options-inner {
+    min-height: 0; overflow: hidden;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: clamp(0.7rem, 1.6vmin, 1rem);
+    padding-top: 0;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.2s ease, padding-top 0.32s ease, visibility 0s linear 0.32s;
+}
+#welcome-screen-more-options.open #welcome-screen-more-options-inner {
+    padding-top: 0.7rem;
+    opacity: 1; visibility: visible;
+    transition: opacity 0.28s ease 0.05s, padding-top 0.32s ease, visibility 0s;
+}
+@media (max-width: 480px) {
+    #welcome-screen-more-options-inner { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #welcome-screen-more-options,
+    #welcome-screen-more-options-inner,
+    #welcome-screen-more-toggle span { transition-duration: 0.01ms !important; transition-delay: 0s !important; }
+}

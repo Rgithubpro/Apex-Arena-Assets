@@ -14,24 +14,23 @@ WELCOME  →  #welcome
                     <h4 id="welcome-screen-subtitle" class="ws-card-subtitle">Choose how to log in</h4>
                     <p id="welcome-screen-subsubtitle" class="ws-card-subsubtitle">This way your data can be saved and accessed across devices</p>
                     <div id="welcome-screen-login-options">
-                        <button class="welcome-screen-login-option" id="welcome-screen-login-option-google">
+                        <button class="welcome-screen-login-option" id="welcome-screen-login-option-google" data-method="google">
                             <img data-asset="assets/logos/logo-google.png" alt="Google logo" class="welcome-screen-login-option-icon" id="welcome-screen-login-option-icon-google">
                             <p id="welcome-screen-login-option-text-google">Continue with Google</p>
                         </button>
-                        <button class="welcome-screen-login-option" id="welcome-screen-login-option-microsoft">
-                            <img data-asset="assets/logos/logo-microsoft.png" alt="Microsoft logo" class="welcome-screen-login-option-icon" id="welcome-screen-login-option-icon-microsoft">
-                            <p id="welcome-screen-login-option-text-microsoft">Continue with Microsoft</p>
-                        </button>
-                        <button class="welcome-screen-login-option" id="welcome-screen-login-option-discord">
+                        <button class="welcome-screen-login-option" id="welcome-screen-login-option-discord" data-method="discord">
                             <img data-asset="assets/logos/logo-discord.png" alt="Discord logo" class="welcome-screen-login-option-icon" id="welcome-screen-login-option-icon-discord">
                             <p id="welcome-screen-login-option-text-discord">Continue with Discord</p>
                         </button>
-                        <button class="welcome-screen-login-option" id="welcome-screen-login-option-email">
+                        <button class="welcome-screen-login-option" id="welcome-screen-login-option-email" data-method="email">
                             <img data-asset="assets/logos/logo-mail.png" alt="E-mail" class="welcome-screen-login-option-icon" id="welcome-screen-login-option-icon-email">
                             <p id="welcome-screen-login-option-text-email">Continue with E-mail</p>
                         </button>
                     </div>
-                    <button id="welcome-screen-guest-button">
+                    <!-- "More ways to log in": filled from the providers the server has switched on -->
+                    <button type="button" id="welcome-screen-more-toggle" aria-expanded="false" aria-controls="welcome-screen-more-options" hidden>More ways to log in <span aria-hidden="true">&#9662;</span></button>
+                    <div id="welcome-screen-more-options"><div id="welcome-screen-more-options-inner"></div></div>
+                    <button id="welcome-screen-guest-button" data-method="guest">
                         <img data-asset="assets/logos/logo-guests.png" alt="Guest logo" id="welcome-screen-guest-button-icon">
                         <span id="welcome-screen-guest-button-copy">
                             <p id="welcome-screen-guest-button-text">Or continue as Guest</p>
@@ -144,7 +143,7 @@ WELCOME  →  #welcome
                 <div class="ws-card">
                     <h1 id="welcome-screen-disclaimer-title" class="ws-card-title">Welcome to Apex-Arena!</h1>
                     <h2 id="welcome-screen-disclaimer-subtitle">We hope you have a great time!</h2>
-                    <!-- Only shown to Google / Microsoft / Discord players who still have to pick a username -->
+                    <!-- Only shown to players who logged in with a provider (Google, Discord, ...) who still have to pick a username -->
                     <div class="ws-input-wrap" id="welcome-screen-disclaimer-username-wrap" style="display:none">
                         <input type="text" id="welcome-screen-disclaimer-username" placeholder="Choose a username" maxlength="16" autocomplete="username" autocapitalize="off" spellcheck="false">
                     </div>
