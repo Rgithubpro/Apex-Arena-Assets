@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-20T09:50:59.430Z",
+  "generated": "2026-11-23T18:49:02.296Z",
   "bundles": {
     "assets/icons/profile-pictures.zip": {
       "hash": "d409ee30b78e1b80",
@@ -315,8 +315,8 @@
       "kind": "script"
     },
     "js/pages/match.js": {
-      "hash": "2a576b6cdb70b913",
-      "size": 571,
+      "hash": "073378055dc0a99a",
+      "size": 20180,
       "kind": "script"
     },
     "js/pages/matchmaking.js": {
@@ -419,8 +419,8 @@
       "pageKey": "match-results"
     },
     "html/pages/match.html": {
-      "hash": "f20830f1197cb537",
-      "size": 330,
+      "hash": "7ade3297ca764295",
+      "size": 4431,
       "kind": "page",
       "pageKey": "match"
     },
@@ -515,8 +515,8 @@
       "size": 954
     },
     "css/pages/match.css": {
-      "hash": "869352b4db61437c",
-      "size": 1948
+      "hash": "0bc9c34332d49585",
+      "size": 8979
     },
     "css/pages/matchmaking.css": {
       "hash": "e93de96f40796ee6",

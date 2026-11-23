@@ -1,5 +1,82 @@
 <div id="match-screen" class="page">
     <img id="match-screen-background" data-asset="assets/backgrounds/background.png" alt="">
-    <h1 id="match-screen-title">Match in Progress</h1>
-    <button type="button" id="match-screen-back-button" data-route="match-results" aria-label="Go to match results">View Results</button>
+    <header class="match-header">
+        <button type="button" class="match-back-button" data-route="matchmaking" aria-label="Back to matchmaking">← Back</button>
+        <div>
+            <p class="match-eyebrow">APEX ARENA // LIVE</p>
+            <h1>Battle Arena</h1>
+        </div>
+        <div id="match-connection-status" class="match-connection-status" role="status">Connecting to arena service…</div>
+    </header>
+
+    <main class="match-layout">
+        <section id="match-lobby" class="match-panel" aria-labelledby="match-lobby-title">
+            <div class="match-panel-heading">
+                <div>
+                    <p class="match-eyebrow">PLAY TOGETHER</p>
+                    <h2 id="match-lobby-title">Find your fight</h2>
+                </div>
+                <span id="match-player-name" class="match-player-name"></span>
+            </div>
+            <p id="match-lobby-message" class="match-message">Choose a room or create one to invite friends.</p>
+
+            <div class="match-actions">
+                <button type="button" id="match-create-room" class="match-primary-button">Create a room</button>
+                <button type="button" id="match-quick-join" class="match-secondary-button">Quick join</button>
+            </div>
+
+            <div id="match-created-room" class="match-created-room" hidden>
+                <label for="match-room-code">Your room code</label>
+                <div class="match-code-row">
+                    <input id="match-room-code" type="text" readonly aria-label="Room code to share">
+                    <button type="button" id="match-copy-code" class="match-secondary-button">Copy</button>
+                </div>
+                <p>Share this code with friends so they can join your match.</p>
+            </div>
+
+            <div class="match-divider"><span>OR JOIN A FRIEND</span></div>
+            <form id="match-join-form" class="match-join-form">
+                <label class="sr-only" for="match-join-code">Room code</label>
+                <input id="match-join-code" type="text" placeholder="Enter a room code" autocomplete="off" maxlength="64">
+                <button type="submit" class="match-secondary-button">Join room</button>
+            </form>
+
+            <div class="match-room-search">
+                <h3>Room discovery</h3>
+                <p>The current game server doesn’t publish a searchable room list. Use Quick Join to find or create a match, or enter your friend’s room code above.</p>
+            </div>
+        </section>
+
+        <section id="match-game" class="match-panel match-game-panel" aria-label="Live match" hidden>
+            <div class="match-game-heading">
+                <div>
+                    <p class="match-eyebrow">ROOM <span id="match-active-room-code">—</span></p>
+                    <h2>Battle in progress</h2>
+                </div>
+                <button type="button" id="match-leave-room" class="match-secondary-button">Leave match</button>
+            </div>
+            <div class="match-hud" aria-live="polite">
+                <span id="match-hp">HP —</span>
+                <span id="match-score">K 0 / D 0</span>
+                <span id="match-player-count">Players 0/8</span>
+                <span id="match-ping">Ping —</span>
+            </div>
+            <div class="match-arena-frame">
+                <canvas id="match-arena" width="800" height="600" aria-label="Arena game field"></canvas>
+                <div id="match-death-banner" class="match-death-banner" hidden></div>
+            </div>
+            <div class="match-game-footer">
+                <p>Move: WASD / arrows · Aim: click arena · Melee: Space</p>
+                <div class="match-touch-controls">
+                    <div id="match-joystick" class="match-joystick" aria-label="Movement joystick">
+                        <span id="match-joystick-stick"></span>
+                    </div>
+                    <div class="match-touch-actions">
+                        <button type="button" id="match-melee" class="match-action-button">Melee</button>
+                        <button type="button" id="match-shoot" class="match-action-button">Shoot</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 </div>
