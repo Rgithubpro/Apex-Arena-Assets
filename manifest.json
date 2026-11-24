@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-23T18:49:02.296Z",
+  "generated": "2026-11-24T10:14:12.833Z",
   "bundles": {
     "assets/icons/profile-pictures.zip": {
       "hash": "d409ee30b78e1b80",
@@ -315,8 +315,8 @@
       "kind": "script"
     },
     "js/pages/match.js": {
-      "hash": "073378055dc0a99a",
-      "size": 20180,
+      "hash": "e0556ca1eabbeac8",
+      "size": 28093,
       "kind": "script"
     },
     "js/pages/matchmaking.js": {
@@ -515,8 +515,8 @@
       "size": 954
     },
     "css/pages/match.css": {
-      "hash": "0bc9c34332d49585",
-      "size": 8979
+      "hash": "b5049fdd0d7ab5b6",
+      "size": 9158
     },
     "css/pages/matchmaking.css": {
       "hash": "e93de96f40796ee6",

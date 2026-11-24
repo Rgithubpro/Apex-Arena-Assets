@@ -172,8 +172,22 @@
     color: #d3e2ef;
     font: 0.78rem system-ui, sans-serif;
 }
-.match-arena-frame { position: relative; overflow: hidden; border: 2px solid #33526b; border-radius: 0.7rem; background: #101d2e; }
-#match-arena { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; touch-action: none; }
+.match-arena-frame {
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #3b617c;
+    border-radius: 0.7rem;
+    background: #101d2e;
+    box-shadow: 0 0 0 1px rgba(106, 192, 230, 0.12), 0 1rem 2.5rem rgba(0, 0, 0, 0.24);
+}
+#match-arena {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    cursor: crosshair;
+    touch-action: none;
+}
 .match-death-banner {
     position: absolute;
     top: 50%;
@@ -193,7 +207,7 @@
 .match-joystick { position: relative; width: 5.2rem; height: 5.2rem; flex: 0 0 auto; border: 1px solid #4b657a; border-radius: 50%; background: rgba(255, 255, 255, 0.06); touch-action: none; }
 .match-joystick span { position: absolute; top: 50%; left: 50%; width: 2rem; height: 2rem; transform: translate(-50%, -50%); border: 1px solid #6de8f4; border-radius: 50%; background: rgba(35, 154, 189, 0.7); pointer-events: none; }
 .match-touch-actions { display: flex; gap: 0.5rem; }
-.match-action-button { width: 3.4rem; height: 3.4rem; padding: 0.3rem; background: #173a53; font-size: 0.78rem; }
+.match-action-button { width: 3.4rem; height: 3.4rem; padding: 0.3rem; background: #173a53; font-size: 0.78rem; touch-action: manipulation; }
 #match-melee { border-color: rgba(191, 129, 255, 0.65); background: #553b80; }
 #match-shoot { border-color: rgba(255, 126, 116, 0.65); background: #8c3b42; }
 

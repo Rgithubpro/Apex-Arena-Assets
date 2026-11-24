@@ -20,8 +20,10 @@ Router.register('match', (() => {
     let inputX = 0;
     let inputY = 0;
     let joystickPointer = null;
+    let aimPosition = null;
     let keysDown = new Set();
     const meleeSwings = new Map();
+    const selfPositionUpdatedAt = { x: 0, y: 0, time: 0 };
     let clientLoadPromise = null;
     let elements = {};
 
@@ -112,6 +114,55 @@ Router.register('match', (() => {
         return enterMatch((gameClient, name) => gameClient.joinById(code, { name }));
     }
 
+    function resizeArenaCanvas() {
+        if (!elements.arena) return;
+        const bounds = elements.arena.getBoundingClientRect();
+        if (!bounds.width || !bounds.height) return;
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
+        const pixelWidth = Math.round(bounds.width * pixelRatio);
+        const pixelHeight = Math.round(bounds.height * pixelRatio);
+        if (elements.arena.width !== pixelWidth || elements.arena.height !== pixelHeight) {
+            elements.arena.width = pixelWidth;
+            elements.arena.height = pixelHeight;
+        }
+    }
+
+    function predictedSelfPosition(player) {
+        const elapsed = Math.min(0.06, Math.max(0, (performance.now() - selfPositionUpdatedAt.time) / 1000));
+        const magnitude = Math.hypot(inputX, inputY);
+        if (!magnitude || !elapsed) return { x: player.x, y: player.y };
+        const directionX = inputX / magnitude;
+        const directionY = inputY / magnitude;
+        const radius = player.radius || 16;
+        const speed = player.speed || 160;
+        let x = Math.max(radius, Math.min(ARENA_WIDTH - radius, player.x + directionX * speed * elapsed));
+        let y = Math.max(radius, Math.min(ARENA_HEIGHT - radius, player.y + directionY * speed * elapsed));
+
+        room.state.obstacles?.forEach?.((obstacle) => {
+            const closestX = Math.max(obstacle.x, Math.min(x, obstacle.x + obstacle.width));
+            const closestY = Math.max(obstacle.y, Math.min(y, obstacle.y + obstacle.height));
+            const dx = x - closestX;
+            const dy = y - closestY;
+            const distance = Math.hypot(dx, dy);
+            if (distance >= radius) return;
+            if (!distance) {
+                y -= radius;
+                return;
+            }
+            const overlap = radius - distance;
+            x += (dx / distance) * overlap;
+            y += (dy / distance) * overlap;
+        });
+        return { x, y };
+    }
+
+    function syncSelfPrediction(player) {
+        if (player.x === selfPositionUpdatedAt.x && player.y === selfPositionUpdatedAt.y) return;
+        selfPositionUpdatedAt.x = player.x;
+        selfPositionUpdatedAt.y = player.y;
+        selfPositionUpdatedAt.time = performance.now();
+    }
+
     function drawArena() {
         if (!pageActive || !room?.state) {
             animationFrame = requestAnimationFrame(drawArena);
@@ -121,11 +172,31 @@ Router.register('match', (() => {
         const canvas = elements.arena;
         const context = canvas.getContext('2d');
         const state = room.state;
+        resizeArenaCanvas();
+        context.setTransform(canvas.width / ARENA_WIDTH, 0, 0, canvas.height / ARENA_HEIGHT, 0, 0);
         context.clearRect(0, 0, ARENA_WIDTH, ARENA_HEIGHT);
-        context.fillStyle = '#111e2c';
+        const background = context.createLinearGradient(0, 0, ARENA_WIDTH, ARENA_HEIGHT);
+        background.addColorStop(0, '#142438');
+        background.addColorStop(0.52, '#101e30');
+        background.addColorStop(1, '#0b1928');
+        context.fillStyle = background;
         context.fillRect(0, 0, ARENA_WIDTH, ARENA_HEIGHT);
 
-        context.strokeStyle = 'rgba(147, 191, 220, 0.08)';
+        context.strokeStyle = 'rgba(132, 185, 218, 0.035)';
+        context.lineWidth = 0.5;
+        for (let x = 20; x < ARENA_WIDTH; x += 20) {
+            context.beginPath();
+            context.moveTo(x, 0);
+            context.lineTo(x, ARENA_HEIGHT);
+            context.stroke();
+        }
+        for (let y = 20; y < ARENA_HEIGHT; y += 20) {
+            context.beginPath();
+            context.moveTo(0, y);
+            context.lineTo(ARENA_WIDTH, y);
+            context.stroke();
+        }
+        context.strokeStyle = 'rgba(132, 185, 218, 0.075)';
         context.lineWidth = 1;
         for (let x = 0; x <= ARENA_WIDTH; x += 40) {
             context.beginPath();
@@ -141,23 +212,79 @@ Router.register('match', (() => {
         }
 
         state.obstacles?.forEach?.((obstacle) => {
-            context.fillStyle = '#34485b';
-            context.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-            context.strokeStyle = '#59748c';
-            context.strokeRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            const { x, y, width, height } = obstacle;
+            context.save();
+            context.shadowColor = 'rgba(0, 0, 0, 0.45)';
+            context.shadowBlur = 12;
+            context.shadowOffsetY = 5;
+            const surface = context.createLinearGradient(x, y, x, y + height);
+            surface.addColorStop(0, '#49637a');
+            surface.addColorStop(0.12, '#344c63');
+            surface.addColorStop(1, '#24384c');
+            context.fillStyle = surface;
+            context.beginPath();
+            context.roundRect(x, y, width, height, 5);
+            context.fill();
+            context.shadowColor = 'transparent';
+            context.shadowBlur = 0;
+            context.shadowOffsetY = 0;
+            context.strokeStyle = 'rgba(159, 205, 235, 0.42)';
+            context.lineWidth = 1.5;
+            context.stroke();
+            context.strokeStyle = 'rgba(194, 225, 246, 0.16)';
+            context.beginPath();
+            context.moveTo(x + 7, y + 3);
+            context.lineTo(x + width - 7, y + 3);
+            context.stroke();
+            context.restore();
         });
 
         state.projectiles?.forEach?.((projectile) => {
+            const trailLength = 14;
+            const trail = context.createLinearGradient(
+                projectile.x - projectile.vx * 0.035,
+                projectile.y - projectile.vy * 0.035,
+                projectile.x,
+                projectile.y,
+            );
+            trail.addColorStop(0, 'rgba(255, 170, 72, 0)');
+            trail.addColorStop(1, 'rgba(255, 204, 104, 0.72)');
+            context.beginPath();
+            context.moveTo(projectile.x - projectile.vx * 0.035, projectile.y - projectile.vy * 0.035);
+            context.lineTo(projectile.x, projectile.y);
+            context.strokeStyle = trail;
+            context.lineWidth = trailLength;
+            context.lineCap = 'round';
+            context.stroke();
             context.beginPath();
             context.arc(projectile.x, projectile.y, projectile.radius, 0, Math.PI * 2);
-            context.fillStyle = '#ffc857';
-            context.shadowColor = '#ffc857';
-            context.shadowBlur = 9;
+            const shot = context.createRadialGradient(projectile.x - 2, projectile.y - 2, 1, projectile.x, projectile.y, projectile.radius + 3);
+            shot.addColorStop(0, '#fff4bd');
+            shot.addColorStop(0.45, '#ffd068');
+            shot.addColorStop(1, '#ff873b');
+            context.fillStyle = shot;
+            context.shadowColor = '#ffae4b';
+            context.shadowBlur = 14;
             context.fill();
             context.shadowBlur = 0;
         });
 
         state.players?.forEach?.((player, sessionId) => drawPlayer(context, player, sessionId));
+        if (aimPosition) {
+            context.save();
+            context.strokeStyle = 'rgba(207, 245, 255, 0.9)';
+            context.lineWidth = 1.5;
+            context.shadowColor = '#55dcff';
+            context.shadowBlur = 8;
+            context.beginPath();
+            context.arc(aimPosition.x, aimPosition.y, 9, 0, Math.PI * 2);
+            context.moveTo(aimPosition.x - 14, aimPosition.y);
+            context.lineTo(aimPosition.x + 14, aimPosition.y);
+            context.moveTo(aimPosition.x, aimPosition.y - 14);
+            context.lineTo(aimPosition.x, aimPosition.y + 14);
+            context.stroke();
+            context.restore();
+        }
         const now = performance.now();
         for (const [sessionId, startedAt] of meleeSwings) {
             const player = state.players.get(sessionId);
@@ -184,40 +311,74 @@ Router.register('match', (() => {
     function drawPlayer(context, player, sessionId) {
         const isSelf = sessionId === room.sessionId;
         const radius = player.radius || 16;
+        const position = isSelf && player.alive ? predictedSelfPosition(player) : player;
+        const x = position.x;
+        const y = position.y;
+        const body = context.createRadialGradient(x - radius * 0.38, y - radius * 0.45, 1, x, y, radius * 1.3);
+        body.addColorStop(0, '#ffffff');
+        body.addColorStop(0.12, player.color || '#ffffff');
+        body.addColorStop(1, player.color || '#ffffff');
         context.globalAlpha = player.alive ? (player.connected ? 1 : 0.5) : 0.28;
         context.beginPath();
-        context.arc(player.x, player.y, radius, 0, Math.PI * 2);
-        context.fillStyle = player.color || '#ffffff';
+        context.arc(x, y, radius + 4, 0, Math.PI * 2);
+        context.fillStyle = isSelf ? 'rgba(87, 219, 255, 0.15)' : 'rgba(255, 255, 255, 0.07)';
         context.fill();
-        context.lineWidth = isSelf ? 3 : 2;
-        context.strokeStyle = isSelf ? '#ffffff' : 'rgba(255,255,255,0.75)';
+        context.beginPath();
+        context.arc(x, y, radius, 0, Math.PI * 2);
+        context.fillStyle = body;
+        context.fill();
+        context.lineWidth = isSelf ? 2.5 : 1.5;
+        context.strokeStyle = isSelf ? '#c8f8ff' : 'rgba(255,255,255,0.82)';
         context.stroke();
         context.globalAlpha = 1;
 
         if (player.alive) {
+            const facingLength = radius + 16;
             context.beginPath();
-            context.moveTo(player.x, player.y);
-            context.lineTo(player.x + player.facingX * (radius + 12), player.y + player.facingY * (radius + 12));
-            context.lineWidth = 3;
+            context.moveTo(x, y);
+            context.lineTo(x + player.facingX * facingLength, y + player.facingY * facingLength);
+            context.lineWidth = 4;
+            context.lineCap = 'round';
+            context.strokeStyle = 'rgba(0, 0, 0, 0.55)';
+            context.stroke();
+            context.beginPath();
+            context.moveTo(x, y);
+            context.lineTo(x + player.facingX * facingLength, y + player.facingY * facingLength);
+            context.lineWidth = 2.3;
             context.strokeStyle = '#ffffff';
             context.stroke();
 
-            const barWidth = 36;
+            const barWidth = 42;
+            const barY = y - radius - 14;
             const healthRatio = Math.max(0, player.hp / player.maxHp);
-            context.fillStyle = 'rgba(0,0,0,0.7)';
-            context.fillRect(player.x - barWidth / 2, player.y - radius - 12, barWidth, 5);
-            context.fillStyle = healthRatio > 0.5 ? '#5ee28b' : healthRatio > 0.2 ? '#ffc857' : '#ff6b73';
-            context.fillRect(player.x - barWidth / 2, player.y - radius - 12, barWidth * healthRatio, 5);
+            context.fillStyle = 'rgba(3, 10, 17, 0.92)';
+            context.beginPath();
+            context.roundRect(x - barWidth / 2, barY, barWidth, 6, 3);
+            context.fill();
+            const healthColor = healthRatio > 0.5 ? '#68f0a2' : healthRatio > 0.2 ? '#ffd05e' : '#ff687b';
+            context.fillStyle = healthColor;
+            context.shadowColor = healthColor;
+            context.shadowBlur = 6;
+            context.beginPath();
+            context.roundRect(x - barWidth / 2 + 1, barY + 1, Math.max(0, (barWidth - 2) * healthRatio), 4, 2);
+            context.fill();
+            context.shadowBlur = 0;
         }
 
-        context.font = '12px system-ui, sans-serif';
+        context.font = '600 12px system-ui, sans-serif';
         context.textAlign = 'center';
-        context.lineWidth = 3;
-        context.strokeStyle = 'rgba(0,0,0,0.9)';
         const label = `${player.name || 'Player'}${isSelf ? ' (you)' : ''}`;
-        context.strokeText(label, player.x, player.y + radius + 16);
-        context.fillStyle = '#ffffff';
-        context.fillText(label, player.x, player.y + radius + 16);
+        const labelY = y + radius + 22;
+        const labelWidth = context.measureText(label).width + 14;
+        context.fillStyle = 'rgba(4, 12, 21, 0.78)';
+        context.beginPath();
+        context.roundRect(x - labelWidth / 2, labelY - 13, labelWidth, 19, 8);
+        context.fill();
+        context.lineWidth = 3;
+        context.strokeStyle = 'rgba(0,0,0,0.8)';
+        context.strokeText(label, x, labelY);
+        context.fillStyle = isSelf ? '#e5fbff' : '#e5edf5';
+        context.fillText(label, x, labelY);
     }
 
     function updateHud() {
@@ -226,6 +387,7 @@ Router.register('match', (() => {
         const self = state.players.get(room.sessionId);
         elements.playerCount.textContent = `Players ${state.players.size}/8`;
         if (self) {
+            syncSelfPrediction(self);
             elements.hp.textContent = `HP ${self.hp}/${self.maxHp}`;
             elements.score.textContent = `K ${self.kills} / D ${self.deaths}`;
             if (!self.alive) {
@@ -248,6 +410,10 @@ Router.register('match', (() => {
         inputX = 0;
         inputY = 0;
         sequence = 0;
+        aimPosition = null;
+        selfPositionUpdatedAt.x = Number.NaN;
+        selfPositionUpdatedAt.y = Number.NaN;
+        selfPositionUpdatedAt.time = performance.now();
 
         setStatus('Connected to match', 'connected');
         room.onStateChange(() => updateHud());
@@ -351,11 +517,17 @@ Router.register('match', (() => {
 
     function shootAtCanvas(event) {
         if (!room) return;
+        const target = canvasPosition(event);
+        aimPosition = target;
+        sendShot(target.x, target.y);
+    }
+
+    function canvasPosition(event) {
         const bounds = elements.arena.getBoundingClientRect();
-        sendShot(
-            ((event.clientX - bounds.left) / bounds.width) * ARENA_WIDTH,
-            ((event.clientY - bounds.top) / bounds.height) * ARENA_HEIGHT,
-        );
+        return {
+            x: ((event.clientX - bounds.left) / bounds.width) * ARENA_WIDTH,
+            y: ((event.clientY - bounds.top) / bounds.height) * ARENA_HEIGHT,
+        };
     }
 
     function updateJoystick(event) {
@@ -406,6 +578,10 @@ Router.register('match', (() => {
         }, { signal });
         elements.leaveRoom.addEventListener('click', leaveMatch, { signal });
         elements.arena.addEventListener('click', shootAtCanvas, { signal });
+        elements.arena.addEventListener('pointermove', (event) => {
+            if (event.pointerType === 'mouse') aimPosition = canvasPosition(event);
+        }, { signal });
+        elements.arena.addEventListener('pointerleave', () => { aimPosition = null; }, { signal });
         elements.melee.addEventListener('click', sendMelee, { signal });
         elements.shoot.addEventListener('click', sendShotFacing, { signal });
         elements.joystick.addEventListener('pointerdown', (event) => {
