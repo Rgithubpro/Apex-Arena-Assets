@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-24T10:14:12.833Z",
+  "generated": "2026-11-25T13:49:49.087Z",
   "bundles": {
     "assets/icons/profile-pictures.zip": {
       "hash": "d409ee30b78e1b80",
@@ -265,9 +265,14 @@
       "size": 7006
     },
     "js/data/auth.js": {
-      "hash": "30a6f5c1c4eb410c",
-      "size": 25183,
+      "hash": "ca37fc3d2b686c02",
+      "size": 30209,
       "kind": "module"
+    },
+    "js/pages/admin.js": {
+      "hash": "bb523b186b8e4618",
+      "size": 18622,
+      "kind": "script"
     },
     "js/pages/battlepass.js": {
       "hash": "ecfa8226c03806a7",
@@ -340,8 +345,8 @@
       "kind": "script"
     },
     "js/pages/settings.js": {
-      "hash": "29402b5ea3fcb2c3",
-      "size": 4622,
+      "hash": "c235b357f4cf7dfb",
+      "size": 5028,
       "kind": "script"
     },
     "js/pages/shop.js": {
@@ -360,9 +365,15 @@
       "kind": "script"
     },
     "js/pages/welcome.js": {
-      "hash": "d28b4adbe3637554",
-      "size": 47878,
+      "hash": "6a965059f8f583f2",
+      "size": 48205,
       "kind": "script"
+    },
+    "html/pages/admin.html": {
+      "hash": "b83fb4ea06deb41b",
+      "size": 250,
+      "kind": "page",
+      "pageKey": "admin"
     },
     "html/pages/battlepass.html": {
       "hash": "39ad5719766c4e88",
@@ -449,8 +460,8 @@
       "pageKey": "quests"
     },
     "html/pages/settings.html": {
-      "hash": "2f4cd3daec50ad9f",
-      "size": 735,
+      "hash": "e27e5c6ca1ccb57b",
+      "size": 826,
       "kind": "page",
       "pageKey": "settings"
     },
@@ -477,6 +488,10 @@
       "size": 15104,
       "kind": "page",
       "pageKey": "welcome"
+    },
+    "css/pages/admin.css": {
+      "hash": "496bb84be45cb452",
+      "size": 3592
     },
     "css/pages/battlepass.css": {
       "hash": "fca45a21031d36f1",
@@ -535,8 +550,8 @@
       "size": 1888
     },
     "css/pages/settings.css": {
-      "hash": "166653caf9904592",
-      "size": 2829
+      "hash": "7a387cd8a28a89aa",
+      "size": 3281
     },
     "css/pages/shop.css": {
       "hash": "8e4d04c74420df56",

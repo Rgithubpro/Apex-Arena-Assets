@@ -312,7 +312,11 @@ Router.register('welcome', (() => {
 
     function authMessage(err) {
         if (err?.code === 'provider_not_configured') return 'That login isn\u2019t available yet.';
-        if (err?.code === 'account_banned') return err.publicReason ? `This account is banned: ${err.publicReason}` : 'This account is banned.';
+        if (err?.code === 'account_banned') {
+            const until = err.until ? ` until ${new Date(err.until * 1000).toLocaleString()}` : '';
+            return err.publicReason ? `This account is banned${until}: ${err.publicReason}` : `This account is banned${until}.`;
+        }
+        if (err?.code === 'ip_banned') return err.publicReason ? `This network is blocked: ${err.publicReason}` : 'This network has been blocked.';
         return err?.message || 'Something went wrong. Please try again.';
     }
 
@@ -869,7 +873,7 @@ Router.register('welcome', (() => {
        HAND-OFF TO HOME
        ============================================================ */
     function enterHome() {
-        window.Router?.go?.('home');
+        window.Router?.go?.(location.hash === '#admin' ? 'admin' : 'home');
     }
 
     /* ============================================================

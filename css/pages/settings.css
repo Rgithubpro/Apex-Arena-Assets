@@ -48,3 +48,9 @@
     margin: 0; min-height: 1.2em; color: #ff8a94;
     font-size: clamp(0.85rem, 1.9vmin, 1.1rem);
 }
+#settings-screen-admin-button {
+    width: 100%; padding: 0.7rem 1.2rem; border: 1px solid rgba(10, 204, 238, 0.55); border-radius: 0.75rem;
+    background: linear-gradient(180deg, #14a8c4, #0a6a82); box-shadow: 0 4px 0 #050d18, 0 6px 14px rgba(0, 0, 0, 0.4);
+    color: inherit; font: inherit; font-size: clamp(1rem, 2.5vmin, 1.5rem); cursor: pointer;
+}
+#settings-screen-admin-button:active { transform: translateY(2px); box-shadow: 0 2px 0 #050d18; }

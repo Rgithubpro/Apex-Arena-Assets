@@ -1,0 +1,32 @@
+#admin-screen { position: fixed; inset: 0; overflow: auto; background: radial-gradient(120% 100% at 50% 0%, #12304f 0%, #0b1a2e 55%, #08121f 100%); color: #fff; font-family: 'lilita-one', sans-serif; }
+#admin-bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 1rem; padding: max(0.8rem, env(safe-area-inset-top)) 1rem 0.8rem; background: rgba(8, 18, 31, 0.92); border-bottom: 1px solid rgba(10, 204, 238, 0.3); backdrop-filter: blur(6px); }
+#admin-bar h1 { margin: 0; font-size: clamp(1.2rem, 3vmin, 1.8rem); flex: 1; }
+#admin-role { padding: 0.15rem 0.7rem; border-radius: 999px; background: rgba(10, 204, 238, 0.18); border: 1px solid rgba(10, 204, 238, 0.5); font-size: 0.9rem; }
+#admin-main { max-width: 1100px; margin: 0 auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+#admin-screen button { padding: 0.55rem 1rem; border-radius: 0.7rem; border: 1px solid rgba(10, 204, 238, 0.55); background: linear-gradient(180deg, #1b3a5e, #08182a); color: inherit; font: inherit; cursor: pointer; box-shadow: 0 3px 0 #050d18; }
+#admin-screen button:active { transform: translateY(2px); box-shadow: 0 1px 0 #050d18; }
+#admin-screen button.primary { background: linear-gradient(180deg, #14a8c4, #0a6a82); }
+#admin-screen button.danger { border-color: rgba(255, 85, 102, 0.7); background: linear-gradient(180deg, #6a1f30, #2a0812); }
+#admin-screen button:disabled { opacity: 0.5; cursor: default; }
+#admin-screen input, #admin-screen textarea, #admin-screen select { box-sizing: border-box; padding: 0.55rem 0.8rem; border-radius: 0.7rem; border: 1px solid rgba(10, 204, 238, 0.35); background: #08182a; color: #fff; font: inherit; max-width: 100%; }
+.adm-card { padding: 1rem 1.2rem; border-radius: 1rem; border: 1px solid rgba(10, 204, 238, 0.35); background: linear-gradient(180deg, rgba(13, 39, 64, 0.9), rgba(8, 24, 42, 0.9)); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); }
+.adm-card h2, .adm-card h3 { margin: 0 0 0.6rem; }
+.adm-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.adm-tabs button.active { background: linear-gradient(180deg, #14a8c4, #0a6a82); }
+.adm-row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.adm-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; }
+.adm-stat b { display: block; font-size: 1.9rem; color: #01fbff; }
+.adm-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.adm-table th { text-align: left; color: #8fd8ea; font-weight: normal; padding: 0.3rem 0.5rem; }
+.adm-table td { padding: 0.4rem 0.5rem; border-top: 1px solid rgba(10, 204, 238, 0.15); vertical-align: top; word-break: break-word; }
+.adm-table tr.click { cursor: pointer; }
+.adm-table tr.click:hover { background: rgba(10, 204, 238, 0.08); }
+.adm-muted { opacity: 0.65; }
+.adm-tag { display: inline-block; padding: 0 0.5rem; border-radius: 999px; background: rgba(10, 204, 238, 0.2); font-size: 0.8rem; margin-right: 0.3rem; }
+.adm-tag.bad { background: rgba(255, 85, 102, 0.3); }
+.adm-msg { min-height: 1.3em; color: #ff8a94; }
+.adm-msg.ok { color: #6df0a8; }
+.adm-dialog { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(3, 10, 20, 0.75); }
+.adm-dialog .adm-card { width: min(92vw, 440px); display: flex; flex-direction: column; gap: 0.5rem; }
+.adm-dialog label { font-size: 0.9rem; color: #8fd8ea; }
+.adm-secret { font-family: monospace; font-size: 1.1rem; padding: 0.5rem; background: #08182a; border-radius: 0.6rem; word-break: break-all; user-select: all; }

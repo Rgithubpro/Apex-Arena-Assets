@@ -3,6 +3,7 @@ Router.register('settings', (() => {
 
     let backButton = null;
     let logoutButton = null;
+    let adminButton = null;
     let deleteButton = null;
     let passwordInput = null;
     let note = null;
@@ -12,6 +13,7 @@ Router.register('settings', (() => {
     let busy = false;
 
     const goHome = () => Router.go('home');
+    const goAdmin = () => Router.go('admin');
 
     function disarm() {
         clearTimeout(armTimer);
@@ -86,6 +88,7 @@ Router.register('settings', (() => {
         start() {
             backButton = document.getElementById('settings-screen-back-button');
             logoutButton = document.getElementById('settings-screen-logout-button');
+            adminButton = document.getElementById('settings-screen-admin-button');
             deleteButton = document.getElementById('settings-screen-delete-button');
             passwordInput = document.getElementById('settings-screen-delete-password');
             note = document.getElementById('settings-screen-account-note');
@@ -94,12 +97,14 @@ Router.register('settings', (() => {
             backButton?.addEventListener('click', goHome);
             logoutButton?.addEventListener('click', onLogout);
             deleteButton?.addEventListener('click', onDelete);
+            adminButton?.addEventListener('click', goAdmin);
 
             // Everyone can delete their account; only real accounts can log out (a guest IS this device).
             const user = window.Auth?.user;
             deleteLabel = user?.is_guest ? 'Delete guest account' : 'Delete account';
             if (nameEl) nameEl.textContent = user ? `${user.username}${user.is_guest ? ' (guest)' : ''}` : '';
             if (logoutButton) logoutButton.hidden = !user || user.is_guest;
+            if (adminButton) adminButton.hidden = !user || !user.role || user.role === 'player'; // staff only
             if (deleteButton) deleteButton.hidden = !user;
             if (note) note.textContent = '';
             busy = false;
@@ -109,8 +114,9 @@ Router.register('settings', (() => {
             backButton?.removeEventListener('click', goHome);
             logoutButton?.removeEventListener('click', onLogout);
             deleteButton?.removeEventListener('click', onDelete);
+            adminButton?.removeEventListener('click', goAdmin);
             disarm();
-            backButton = logoutButton = deleteButton = passwordInput = note = null;
+            backButton = logoutButton = adminButton = deleteButton = passwordInput = note = null;
         },
     };
 })());

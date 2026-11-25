@@ -27,7 +27,7 @@ const DB_NAME = 'apex-arena-auth';
 const STORE_NAME = 'kv';
 const WAKE_RETRY_MS = 2500;
 const WAKE_MAX_RETRIES = 30; // Render's free tier can need up to ~a minute to wake up
-const WATCH_INTERVAL_MS = 60_000;
+const WATCH_INTERVAL_MS = 30_000; // how often an open game asks the server whether it is still allowed in
 
 // The server only accepts a proof stamped within about a minute of ITS clock.
 //   false = strict: a wrong device clock is refused, with a clear message (what you asked for)
@@ -223,10 +223,13 @@ async function request(method, path, { body, auth = false, proof = true, query }
                 Number(res.headers.get('Retry-After')) || undefined,
             );
             err.publicReason = data?.public_reason ?? null;
+            err.until = data?.until ?? null; // end of a time-out (unix seconds)
             console.warn(`[auth] ${method} ${path} -> ${res.status} ${err.code}`);
             lastError = { code: err.code, status: err.status, message: err.message, path, clockDiff: serverClockDiff };
             // A banned player who is logged in on this device: sign out and show the message.
-            if (data?.error === 'account_banned' && (auth || path === '/auth/refresh')) await onBanned(err.publicReason);
+            if (data?.error === 'account_banned' && (auth || path === '/auth/refresh')) await onBanned(err.publicReason, err.until);
+            // Logged out by staff, or the same account is active on another device: popup, wherever the player is.
+            if (['multiple_devices', 'logged_out_by_staff'].includes(data?.error) && (auth || path === '/auth/refresh')) await onSessionKilled(data.error, err.message);
             throw err;
         }
         return data;
@@ -297,12 +300,12 @@ function stopWatch() {
 }
 
 /** Banned: forget the login, remember the message for the next load, and restart the app. */
-async function onBanned(publicReason) {
+async function onBanned(publicReason, until) {
     stopWatch();
     session = null;
     await store.del('refresh');
     if (suppressBanReload) return;
-    sessionStorage.setItem(BANNED_KEY, JSON.stringify({ reason: publicReason ?? null }));
+    sessionStorage.setItem(BANNED_KEY, JSON.stringify({ reason: publicReason ?? null, until: until ?? null }));
     location.reload();
 }
 
@@ -314,19 +317,87 @@ async function onSessionEnded() {
     location.reload();
 }
 
+/* ---------------- popup that works over any screen (also mid-game) ---------------- */
+let popupShown = false;
+
+function showAccountPopup({ title, text, buttons }) {
+    if (document.getElementById('apex-auth-popup')) return;
+    if (!document.getElementById('apex-auth-popup-style')) {
+        const style = document.createElement('style');
+        style.id = 'apex-auth-popup-style';
+        style.textContent = `
+        #apex-auth-popup{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:rgba(3,10,20,.75);padding:1rem;font-family:'lilita-one',sans-serif}
+        #apex-auth-popup .card{width:min(92vw,460px);padding:1.4rem 1.6rem;border-radius:1.2rem;border:1px solid rgba(10,204,238,.45);background:linear-gradient(180deg,#0d2740,#08182a);box-shadow:0 10px 40px rgba(0,0,0,.55),0 0 30px rgba(10,204,238,.18);color:#fff;text-align:center;display:flex;flex-direction:column;gap:.8rem}
+        #apex-auth-popup h2{margin:0;font-size:clamp(1.4rem,3.4vmin,2rem)}
+        #apex-auth-popup p{margin:0;line-height:1.35;color:#d8efff}
+        #apex-auth-popup .row{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:.4rem}
+        #apex-auth-popup button{padding:.7rem 1.2rem;border-radius:.75rem;border:1px solid rgba(10,204,238,.55);background:linear-gradient(180deg,#1b3a5e,#08182a);color:#fff;font:inherit;cursor:pointer;box-shadow:0 4px 0 #050d18}
+        #apex-auth-popup button.primary{background:linear-gradient(180deg,#14a8c4,#0a6a82)}`;
+        document.head.append(style);
+    }
+    const card = document.createElement('div');
+    card.className = 'card';
+    const heading = document.createElement('h2');
+    heading.textContent = title;
+    const body = document.createElement('p');
+    body.textContent = text;
+    const row = document.createElement('div');
+    row.className = 'row';
+    for (const { label, primary, onClick } of buttons) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = label;
+        if (primary) btn.className = 'primary';
+        btn.addEventListener('click', onClick);
+        row.append(btn);
+    }
+    card.append(heading, body, row);
+    const overlay = document.createElement('div');
+    overlay.id = 'apex-auth-popup';
+    overlay.setAttribute('role', 'alertdialog');
+    overlay.append(card);
+    document.body.append(overlay);
+}
+
+/** This login was ended on purpose (second device, or staff): forget it and tell the player. */
+async function onSessionKilled(code, message) {
+    stopWatch();
+    session = null;
+    await store.del('refresh');
+    if (suppressBanReload || popupShown) return;
+    popupShown = true;
+    const reload = () => location.reload();
+    if (code === 'multiple_devices') {
+        const method = Auth.lastLoginMethod();
+        const provider = ['google', 'discord', 'github', 'twitch', 'roblox', 'steam'].includes(method);
+        showAccountPopup({
+            title: 'Account used on two devices',
+            text: 'This account was active on two devices at the same time, so it was logged out everywhere. Log in again here, or log out.',
+            buttons: [
+                { label: 'Log in again', primary: true, onClick: () => (provider ? Auth.startOAuth(method).catch(reload) : reload()) },
+                { label: 'Log out', onClick: reload },
+            ],
+        });
+    } else {
+        showAccountPopup({ title: 'Logged out', text: message || 'You were logged out by staff.', buttons: [{ label: 'OK', primary: true, onClick: reload }] });
+    }
+}
+
 function startWatch() {
     if (watchTimer) return;
     const tick = async () => {
-        if (!session || document.hidden) return;
+        if (!session) return;
         try {
-            await request('GET', '/me/status', { auth: true });
+            // A visible page counts as "playing now"; a background tab only listens (it can still be told it was logged out).
+            await request('GET', '/me/status', { auth: true, query: { visible: document.hidden ? '0' : '1' } });
         } catch (err) {
-            // account_banned is already handled inside request(); network errors are ignored (try again next minute)
+            // bans, staff log-outs and the two-device rule are handled inside request(); network errors are ignored
             if (['account_deleted', 'not_logged_in', 'invalid_grant'].includes(err.code)) await onSessionEnded();
         }
     };
     watchTimer = setInterval(tick, WATCH_INTERVAL_MS);
     watchTimer?.unref?.();
+    setTimeout(tick, 1200); // right after login: a conflict with another device shows up at once
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 }
 
@@ -337,8 +408,9 @@ async function initInner() {
     if (pendingBan) {
         sessionStorage.removeItem(BANNED_KEY);
         let reason = null;
-        try { reason = JSON.parse(pendingBan).reason ?? null; } catch { /* ignore */ }
-        return { route: 'banned', reason };
+        let until = null;
+        try { ({ reason = null, until = null } = JSON.parse(pendingBan)); } catch { /* ignore */ }
+        return { route: 'banned', reason, until };
     }
 
     // Coming back from Google / Microsoft / Discord?
@@ -360,7 +432,7 @@ async function initInner() {
                 await setSession(tokens);
                 return { ...routeFor(tokens.user), isNew: !!tokens.is_new };
             } catch (err) {
-                if (err.code === 'account_banned') return { route: 'banned', reason: err.publicReason };
+                if (err.code === 'account_banned') return { route: 'banned', reason: err.publicReason, until: err.until };
                 return { route: 'welcome', error: err.code };
             }
         }
@@ -377,7 +449,7 @@ async function initInner() {
                     return { route: 'welcome', deleted: true };
                 }
             } catch (err) {
-                if (err.code === 'account_banned') return { route: 'banned', reason: err.publicReason };
+                if (err.code === 'account_banned') return { route: 'banned', reason: err.publicReason, until: err.until };
                 reauthFailed = err.code;
             }
         }
@@ -389,7 +461,7 @@ async function initInner() {
             await getAccessToken();
             return { ...routeFor(session.user), ...(reauthFailed ? { reauthFailed } : {}) };
         } catch (err) {
-            if (err.code === 'account_banned') return { route: 'banned', reason: err.publicReason };
+            if (err.code === 'account_banned') return { route: 'banned', reason: err.publicReason, until: err.until };
             return { route: 'welcome', error: err.code };
         }
     }
@@ -452,6 +524,12 @@ export const Auth = {
                 : 'The server refused the proof that goes with the login.';
         } else if (error === 'invalid_grant') {
             text = 'Your saved login has ended or expired. Please log in again.';
+        } else if (error === 'multiple_devices') {
+            text = 'This account was active on two devices at the same time, so it was logged out. Please log in again.';
+        } else if (error === 'logged_out_by_staff') {
+            text = errorDetail?.message || 'You were logged out by staff.';
+        } else if (error === 'ip_banned') {
+            text = 'This network has been blocked.';
         } else if (error === 'invalid_code') {
             text = 'The login link has expired. Please try again.';
         } else if (error === 'provider_error') {
@@ -573,7 +651,12 @@ export const Auth = {
         }
     },
 
-    /** Heartbeat call (also made automatically once a minute while the game is open). */
+    /** Any call to the auth server as the logged-in player (the admin panel uses this). */
+    async api(method, path, { body, query } = {}) {
+        return request(method, path, { auth: true, body, query });
+    },
+
+    /** Heartbeat call (also made automatically every 30 seconds while the game is open). */
     async checkStatus() {
         return request('GET', '/me/status', { auth: true });
     },

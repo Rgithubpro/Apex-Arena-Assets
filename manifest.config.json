@@ -22,6 +22,7 @@
   "js/pages/friends.js": "script",
   "js/pages/friend-profile.js": "script",
   "js/pages/club.js": "script",
+  "js/pages/admin.js": "script",
 
   "js/data/auth.js": "module",
 
@@ -43,5 +44,6 @@
   "html/pages/news.html": "page",
   "html/pages/friends.html": "page",
   "html/pages/friend-profile.html": "page",
-  "html/pages/club.html": "page"
+  "html/pages/club.html": "page",
+  "html/pages/admin.html": "page"
 }
