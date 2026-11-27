@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-25T13:49:49.087Z",
+  "generated": "2026-11-27T13:14:49.580Z",
   "bundles": {
     "assets/icons/profile-pictures.zip": {
       "hash": "d409ee30b78e1b80",
@@ -265,13 +265,13 @@
       "size": 7006
     },
     "js/data/auth.js": {
-      "hash": "ca37fc3d2b686c02",
-      "size": 30209,
+      "hash": "7578f1e6d7b233ee",
+      "size": 34443,
       "kind": "module"
     },
     "js/pages/admin.js": {
-      "hash": "bb523b186b8e4618",
-      "size": 18622,
+      "hash": "01112865a81eb082",
+      "size": 21694,
       "kind": "script"
     },
     "js/pages/battlepass.js": {
@@ -345,8 +345,8 @@
       "kind": "script"
     },
     "js/pages/settings.js": {
-      "hash": "c235b357f4cf7dfb",
-      "size": 5028,
+      "hash": "43c0be0947f45363",
+      "size": 5160,
       "kind": "script"
     },
     "js/pages/shop.js": {
@@ -365,8 +365,8 @@
       "kind": "script"
     },
     "js/pages/welcome.js": {
-      "hash": "6a965059f8f583f2",
-      "size": 48205,
+      "hash": "bc577e872740ea2f",
+      "size": 51433,
       "kind": "script"
     },
     "html/pages/admin.html": {
@@ -484,14 +484,14 @@
       "pageKey": "unlock-battler"
     },
     "html/pages/welcome.html": {
-      "hash": "0ba82da8aae7a46c",
-      "size": 15104,
+      "hash": "c676a1406793667f",
+      "size": 15471,
       "kind": "page",
       "pageKey": "welcome"
     },
     "css/pages/admin.css": {
-      "hash": "496bb84be45cb452",
-      "size": 3592
+      "hash": "6c283dab32357d0f",
+      "size": 3738
     },
     "css/pages/battlepass.css": {
       "hash": "fca45a21031d36f1",
@@ -566,8 +566,8 @@
       "size": 1976
     },
     "css/pages/welcome.css": {
-      "hash": "95926ef92fe8c99f",
-      "size": 43808
+      "hash": "442afa60a0081bc0",
+      "size": 44230
     }
   }
 }
