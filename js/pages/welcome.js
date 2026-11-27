@@ -290,12 +290,7 @@ Router.register('welcome', (() => {
             goToStep('email');
         });
 
-        btnGuest?.addEventListener('click', () => {
-            guestPreviewName = window.Auth.previewGuestName();
-            const { guestUsername } = E();
-            if (guestUsername) guestUsername.textContent = guestPreviewName;
-            goToStep('guest-signup');
-        });
+        btnGuest?.addEventListener('click', showGuestStep);
     }
 
     /* ============================================================
@@ -307,6 +302,12 @@ Router.register('welcome', (() => {
 
     /* ---------- Auth glue: connects this page to js/data/auth.js (window.Auth) ---------- */
     let guestPreviewName = '';
+    let guestExisting = null; // the guest account this device already has ({ username }) or null
+    let guestReplace = false; // the player chose "start a new guest account instead"
+    let guestCaptcha = null; // null = not started, false = none/failed, else { reset() }
+    let guestCaptchaToken = null;
+    let signupCaptcha = null;
+    let signupCaptchaToken = null;
     let disclaimerNeedsUsername = false;
     let disclaimerUsernameOk = false;
 
@@ -353,6 +354,39 @@ Router.register('welcome', (() => {
         } else {
             prepareWelcomeBack(user.username);
             goToStep('welcome-back');
+        }
+    }
+
+    /** Guest step: shows the guest account this device already has (max. one), or a fresh guest name. */
+    async function showGuestStep() {
+        guestExisting = null;
+        guestReplace = false;
+        guestPreviewName = window.Auth.previewGuestName();
+        paintGuestStep();
+        goToStep('guest-signup');
+        try {
+            const lookup = await window.Auth.guestLookup();
+            guestExisting = lookup.exists && !lookup.banned ? lookup : null;
+        } catch { /* server unreachable: treat as a new guest */ }
+        paintGuestStep();
+    }
+
+    function paintGuestStep() {
+        const { guestUsername, guestContinue } = E();
+        const title = document.getElementById('welcome-screen-guest-signup-title');
+        const label = document.getElementById('welcome-screen-guest-signup-username-title');
+        const newLink = document.getElementById('welcome-screen-guest-signup-new-button');
+        const holder = document.getElementById('welcome-screen-guest-captcha');
+        const continuing = !!guestExisting && !guestReplace;
+        if (title) title.textContent = continuing ? 'Welcome back!' : 'Welcome, Guest!';
+        if (label) label.textContent = continuing ? 'Your guest account on this device:' : (guestExisting ? 'Your new guest username will be:' : 'Your guest username is:');
+        if (guestUsername) guestUsername.textContent = continuing ? guestExisting.username : guestPreviewName;
+        if (guestContinue) guestContinue.textContent = continuing ? `Continue as ${guestExisting.username}` : (guestReplace ? 'Delete the old guest and start new' : 'Continue as Guest');
+        if (newLink) newLink.hidden = !guestExisting || guestReplace;
+        if (holder) holder.style.display = continuing ? 'none' : ''; // a NEW guest needs the check, continuing the old one does not
+        if (!continuing && holder && guestCaptcha === null) {
+            guestCaptcha = false;
+            window.Auth.renderCaptcha(holder, (token) => { guestCaptchaToken = token; }).then((handle) => { guestCaptcha = handle || false; });
         }
     }
 
@@ -581,6 +615,11 @@ Router.register('welcome', (() => {
     }
 
     function initSignupValidation() {
+        const signupCaptchaHolder = document.getElementById('welcome-screen-signup-captcha');
+        if (signupCaptchaHolder && signupCaptcha === null) {
+            signupCaptcha = false;
+            window.Auth.renderCaptcha(signupCaptchaHolder, (token) => { signupCaptchaToken = token; }).then((handle) => { signupCaptcha = handle || false; });
+        }
         const {
             signupUsername, signupEmail, signupPassword, signupConfirmPassword,
             signupShowPw, signupShowPwConfirm, signupButton, signupForm,
@@ -710,6 +749,7 @@ Router.register('welcome', (() => {
                 return;
             }
 
+            if (signupCaptcha && !signupCaptchaToken) { window.Notify?.small?.('Complete the check first.', 2500); return; }
             signupButton.classList.add('ws-btn-working');
             signupButton.disabled = true;
             try {
@@ -717,6 +757,7 @@ Router.register('welcome', (() => {
                     username: signupUsername.value.trim(),
                     email: signupEmail.value.trim(),
                     password: signupPassword.value,
+                    captchaToken: signupCaptchaToken,
                 });
                 finishAuthenticated(user); // new account -> terms
             } catch (err) {
@@ -735,6 +776,7 @@ Router.register('welcome', (() => {
             } finally {
                 signupButton.classList.remove('ws-btn-working');
                 signupButton.disabled = false;
+                signupCaptcha?.reset?.();
             }
         });
     }
@@ -747,20 +789,23 @@ Router.register('welcome', (() => {
 
         guestBackArrow?.addEventListener('click', () => goToStep('log-in'));
         guestBack?.addEventListener('click', () => goToStep('log-in'));
+        document.getElementById('welcome-screen-guest-signup-new-button')?.addEventListener('click', () => { guestReplace = true; paintGuestStep(); });
 
         guestContinue?.addEventListener('click', async () => {
             if (guestContinue.classList.contains('ws-btn-working')) return;
+            if ((!guestExisting || guestReplace) && guestCaptcha && !guestCaptchaToken) { window.Notify?.small?.('Complete the check first.', 2500); return; }
             guestContinue.classList.add('ws-btn-working');
             guestContinue.disabled = true;
             try {
                 // New guest -> terms. A guest returning on the same device -> "welcome back".
-                const user = await window.Auth.guest(guestPreviewName || window.Auth.previewGuestName());
+                const user = await window.Auth.guest(guestPreviewName || window.Auth.previewGuestName(), { replace: guestReplace, captchaToken: guestCaptchaToken });
                 finishAuthenticated(user);
             } catch (err) {
                 window.Notify?.small?.(authMessage(err), 3200);
             } finally {
                 guestContinue.classList.remove('ws-btn-working');
                 guestContinue.disabled = false;
+                guestCaptcha?.reset?.();
             }
         });
     }

@@ -99,11 +99,14 @@ Router.register('settings', (() => {
             deleteButton?.addEventListener('click', onDelete);
             adminButton?.addEventListener('click', goAdmin);
 
-            // Everyone can delete their account; only real accounts can log out (a guest IS this device).
+            // Everyone can log out (a guest account stays on this device) and everyone can delete their account.
             const user = window.Auth?.user;
             deleteLabel = user?.is_guest ? 'Delete guest account' : 'Delete account';
             if (nameEl) nameEl.textContent = user ? `${user.username}${user.is_guest ? ' (guest)' : ''}` : '';
-            if (logoutButton) logoutButton.hidden = !user || user.is_guest;
+            if (logoutButton) {
+                logoutButton.hidden = !user;
+                logoutButton.textContent = user?.is_guest ? 'Log out (keeps this guest account)' : 'Log out';
+            }
             if (adminButton) adminButton.hidden = !user || !user.role || user.role === 'player'; // staff only
             if (deleteButton) deleteButton.hidden = !user;
             if (note) note.textContent = '';

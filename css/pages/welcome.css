@@ -1442,3 +1442,9 @@ button:disabled {
     #welcome-screen-more-options-inner,
     #welcome-screen-more-toggle span { transition-duration: 0.01ms !important; transition-delay: 0s !important; }
 }
+
+/* ---- captcha holders + the small "start a new guest account" link ---- */
+.ws-captcha { display: flex; justify-content: center; }
+.ws-captcha:empty { display: none; }
+.ws-link-button { background: none; border: 0; padding: 0.3rem; color: var(--ws-text); font-family: 'lilita-one'; font-size: var(--ws-font-label); opacity: 0.8; text-decoration: underline; cursor: pointer; }
+.ws-link-button[hidden] { display: none; }

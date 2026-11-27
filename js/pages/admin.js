@@ -13,7 +13,10 @@ Router.register('admin', (() => {
     };
     const api = (method, path, body, query) => window.Auth.api(method, path, { body, query });
     const when = (sec) => (sec ? new Date(sec * 1000).toLocaleString() : '-');
-    const isAdmin = () => me?.role === 'admin';
+    const has = (perm) => !!me?.permissions?.includes(perm);
+    const TIMEOUTS = [['5', '5 minutes'], ['15', '15 minutes'], ['30', '30 minutes'], ['60', '1 hour'], ['360', '6 hours'], ['720', '12 hours'], ['1440', '1 day'], ['4320', '3 days'], ['10080', '7 days'], ['43200', '30 days'], ['525600', '1 year']];
+    const HOURS = [['', 'Permanent'], ['1', '1 hour'], ['6', '6 hours'], ['24', '1 day'], ['72', '3 days'], ['168', '7 days'], ['720', '30 days']];
+    const LIMITS = [['0', 'No limit'], ['1', '1 hour'], ['6', '6 hours'], ['24', '1 day'], ['72', '3 days'], ['168', '7 days'], ['720', '30 days']];
 
     let me = null;
     let tab = 'overview';
@@ -39,7 +42,7 @@ Router.register('admin', (() => {
             const inputs = {};
             const card = el('div', { class: 'adm-card' }, el('h3', { text: title }));
             for (const f of fields) {
-                const input = f.long ? el('textarea', { rows: '2' }) : el('input', { type: f.type || 'text' });
+                const input = f.options ? el('select', {}, ...f.options.map(([v, text]) => el('option', { value: v, text }))) : f.long ? el('textarea', { rows: '2' }) : el('input', { type: f.type || 'text' });
                 if (f.value !== undefined) input.value = f.value;
                 if (f.placeholder) input.placeholder = f.placeholder;
                 inputs[f.name] = input;
@@ -103,17 +106,18 @@ Router.register('admin', (() => {
     }
 
     // ------------------------------------------------------------------ main panel
-    const TABS = [['overview', 'Overview'], ['players', 'Players'], ['online', 'Online'], ['bans', 'Bans'], ['rules', 'Username rules', true], ['audit', 'Audit log']];
+    const TABS = [['overview', 'Overview', 'view_players'], ['players', 'Players', 'view_players'], ['online', 'Online', 'view_players'], ['bans', 'Bans', 'view_players'], ['rules', 'Username rules', 'edit_rules'], ['roles', 'Roles & permissions', 'manage_permissions'], ['audit', 'Audit log', 'view_audit']];
 
     function shell() {
         clearInterval(timer);
         const bar = el('div', { class: 'adm-tabs' });
-        for (const [id, label, adminOnly] of TABS) {
-            if (adminOnly && !isAdmin()) continue;
+        tab = TABS.some(([id, , perm]) => id === tab && (!perm || has(perm))) ? tab : (TABS.find(([, , perm]) => !perm || has(perm))?.[0] ?? 'overview');
+        for (const [id, label, perm] of TABS) {
+            if (perm && !has(perm)) continue;
             bar.append(el('button', { class: id === tab ? 'active' : '', text: label, onclick: () => { tab = id; shell(); } }));
         }
         msg = el('p', { class: 'adm-msg' });
-        const view = el('div');
+        const view = el('div', { class: 'adm-view' });
         root.replaceChildren(bar, msg, view);
         views[tab](view);
     }
@@ -153,15 +157,15 @@ Router.register('admin', (() => {
 
         async bans(view) {
             const [{ bans }, { bans: ips }] = await Promise.all([api('GET', '/admin/bans'), api('GET', '/admin/ip-bans')]);
-            const ipForm = isAdmin() ? el('button', { text: 'Ban a network', onclick: async () => {
-                const v = await ask('Ban a network (IP address)', [{ name: 'ip', label: 'IP address' }, { name: 'hours', label: 'Hours (empty = permanent)', type: 'number' }, { name: 'public_reason', label: 'Reason shown to them' }, { name: 'private_reason', label: 'Private note' }], 'Ban', true);
+            const ipForm = has('ip_ban') ? el('button', { text: 'Ban a network', onclick: async () => {
+                const v = await ask('Ban a network (IP address)', [{ name: 'ip', label: 'IP address' }, { name: 'hours', label: 'How long', options: HOURS }, { name: 'public_reason', label: 'Reason shown to them' }, { name: 'private_reason', label: 'Private note' }], 'Ban', true);
                 if (v) run('Network banned', () => api('POST', '/admin/ip-bans', { ip: v.ip, hours: v.hours, public_reason: v.public_reason, private_reason: v.private_reason }), shell);
             } }) : '';
             view.append(el('div', { class: 'adm-card' }, el('h3', { text: 'Banned and timed-out players' }),
                 table(['Name', 'Until', 'Shown to player', 'Private'], bans.map((b) => ({ id: b.id, cells: [b.username ?? '-', b.banned_until ? when(b.banned_until) : 'permanent', b.ban_public_reason, b.ban_reason] })), profile)),
                 el('div', { class: 'adm-card' }, el('h3', { text: 'Banned networks (hashed, addresses are never stored)' }), ipForm,
                     table(['Network id', 'Until', 'Shown', 'Private', 'By', ''], ips.map((b) => ({ cells: [b.ip_hash.slice(0, 8), b.expires_at ? when(b.expires_at) : 'permanent', b.public_reason, b.private_reason, b.created_by,
-                        isAdmin() ? el('button', { text: 'Lift', onclick: () => run('Network ban lifted', () => api('DELETE', `/admin/ip-bans/${b.ip_hash}`), shell) }) : ''] })))));
+                        has('ip_ban') ? el('button', { text: 'Lift', onclick: () => run('Network ban lifted', () => api('DELETE', `/admin/ip-bans/${b.ip_hash}`), shell) }) : ''] })))));
         },
 
         async rules(view) {
@@ -172,10 +176,33 @@ Router.register('admin', (() => {
                 el('p', { class: 'adm-muted', text: `Loaded: ${loaded.exact} exact, ${loaded.contains} contains, ${loaded.regex} regex, ${loaded.allow} allow. Changes apply within about a minute (at once here).` }),
                 el('div', { class: 'adm-row' }, test, el('button', { text: 'Test', onclick: async () => { out.textContent = (await api('POST', '/admin/username-rules/test', { username: test.value })).allowed ? 'allowed' : 'blocked'; } }), out,
                     el('button', { class: 'primary', text: 'Add rule', onclick: async () => {
-                        const v = await ask('Add a rule', [{ name: 'kind', label: 'Kind: contains, exact, regex or allow', value: 'contains' }, { name: 'pattern', label: 'Pattern' }, { name: 'note', label: 'Note' }], 'Add');
+                        const v = await ask('Add a rule', [{ name: 'kind', label: 'Kind', options: [['contains', 'Contains the text'], ['exact', 'Is exactly'], ['regex', 'Matches a pattern (regex)'], ['allow', 'Allowed word (exception)']] }, { name: 'pattern', label: 'Pattern' }, { name: 'note', label: 'Note' }], 'Add');
                         if (v) run('Rule added', () => api('POST', '/admin/username-rules', v), shell);
                     } })),
                 table(['#', 'Kind', 'Pattern', 'Note', ''], rules.map((r) => ({ cells: [r.id, r.kind, r.pattern, r.note, el('button', { class: 'danger', text: 'Delete', onclick: () => run('Rule deleted', () => api('DELETE', `/admin/username-rules/${r.id}`), shell) })] })))));
+        },
+
+        async roles(view) {
+            const data = await api('GET', '/admin/permissions');
+            const roleNames = Object.keys(data.roles);
+            const save = (body) => run('Saved', () => api('POST', '/admin/permissions', body));
+            const rows = data.permissions.map((p) => ({
+                cells: [p.label, ...roleNames.map((r) => {
+                    const box = el('input', { type: 'checkbox' });
+                    box.checked = data.roles[r].includes(p.key);
+                    box.addEventListener('change', () => save({ role: r, perm: p.key, allowed: box.checked }));
+                    return box;
+                })],
+            }));
+            const limits = roleNames.map((r) => {
+                const select = el('select', {}, ...LIMITS.map(([v, text]) => el('option', { value: v, text })));
+                select.value = String(data.limits[r] ?? 0);
+                select.addEventListener('change', () => save({ role: r, timeout_max_hours: Number(select.value) }));
+                return el('div', { class: 'adm-row' }, el('span', { text: `${r}: longest time-out` }), select);
+            });
+            view.append(el('div', { class: 'adm-card' }, el('h3', { text: 'What each role may do' }),
+                el('p', { class: 'adm-muted', text: 'Owners can always do everything. Changes apply at once. You can only change roles below your own.' }),
+                table(['Permission', ...roleNames], rows), ...limits));
         },
 
         async audit(view) {
@@ -213,23 +240,23 @@ Router.register('admin', (() => {
             run(label, () => api(opts.method || 'POST', `/admin/users/${id}${path}`, body), () => profile(id));
         } });
         const reasons = (title, extra = []) => async () => ask(title, [...extra, { name: 'public_reason', label: 'Reason shown to the player' }, { name: 'private_reason', label: 'Private note (staff only)', long: true }], 'Confirm', true);
+        const timeoutOptions = TIMEOUTS.filter(([minutes]) => !me.timeout_max_hours || Number(minutes) <= me.timeout_max_hours * 60);
+        const ladder = ['player', 'moderator', 'admin', 'owner'];
+        const below = me.via === 'key' ? ladder.length : ladder.indexOf(me.role); // you can only hand out roles below your own
+        const roleOptions = ladder.slice(0, below).map((r) => [r, r[0].toUpperCase() + r.slice(1)]);
         const buttons = [
-            act('Log out / kick', '/logout', async () => ask('Log this player out everywhere?', [{ name: 'reason', label: 'Note (optional)' }], 'Log out')),
-            act('Time-out', '/timeout', reasons('Time-out', [{ name: 'minutes', label: 'Minutes', type: 'number', value: '30' }]), { danger: true }),
-            act('Add note', '/note', async () => ask('Private note', [{ name: 'text', label: 'Note', long: true }], 'Save')),
-            banned ? act('Lift ban / time-out', '/unban') : '',
-        ];
-        if (isAdmin()) {
-            buttons.push(
-                act('Ban for good', '/ban', reasons('Ban for good'), { danger: true }),
-                el('button', { class: 'danger', text: 'Ban their network', onclick: async () => { const v = await ask('Ban the network this player last used', [{ name: 'hours', label: 'Hours (empty = permanent)', type: 'number' }, { name: 'public_reason', label: 'Reason shown' }, { name: 'private_reason', label: 'Private note' }], 'Ban network', true); if (v) run('Network banned', () => api('POST', '/admin/ip-bans', { user_id: id, ...v }), () => profile(id)); } }),
-                act('Reset username', '/reset-username', async () => ask('Reset this username? They must pick a new one.', [{ name: 'reason', label: 'Note (optional)' }], 'Reset', true), { danger: true }),
-                act('Ask to accept terms again', '/reset-terms'),
-                act(p.user.multi_device_ok ? 'Forbid several devices' : 'Allow several devices', '/multi-device', async () => ({ allow: !p.user.multi_device_ok })),
-                act('Set role', '/role', async () => ask('Role: player or moderator (admins can only be made with the admin key)', [{ name: 'role', label: 'Role', value: u.staff_role || 'player' }], 'Set')),
-                act('Delete account', '', async () => ask(`Type the username (${u.username}) to delete this account for good`, [{ name: 'confirm', label: 'Username' }], 'Delete', true), { danger: true, method: 'DELETE' }),
-            );
-        }
+            has('logout_kick') && act('Log out / kick', '/logout', async () => ask('Log this player out everywhere?', [{ name: 'reason', label: 'Note (optional)' }], 'Log out')),
+            has('timeout') && act('Time-out', '/timeout', reasons('Time-out', [{ name: 'minutes', label: 'How long', options: timeoutOptions }]), { danger: true }),
+            has('notes') && act('Add note', '/note', async () => ask('Private note', [{ name: 'text', label: 'Note', long: true }], 'Save')),
+            banned && has('unban') && act('Lift ban / time-out', '/unban'),
+            has('ban_permanent') && act('Ban for good', '/ban', reasons('Ban for good'), { danger: true }),
+            has('ip_ban') && el('button', { class: 'danger', text: 'Ban their network', onclick: async () => { const v = await ask('Ban the network this player last used', [{ name: 'hours', label: 'How long', options: HOURS }, { name: 'public_reason', label: 'Reason shown' }, { name: 'private_reason', label: 'Private note' }], 'Ban network', true); if (v) run('Network banned', () => api('POST', '/admin/ip-bans', { user_id: id, ...v }), () => profile(id)); } }),
+            has('reset_username') && act('Reset username', '/reset-username', async () => ask('Reset this username? They must pick a new one.', [{ name: 'reason', label: 'Note (optional)' }], 'Reset', true), { danger: true }),
+            has('reset_terms') && act('Ask to accept terms again', '/reset-terms'),
+            has('multi_device') && act(p.user.multi_device_ok ? 'Forbid several devices' : 'Allow several devices', '/multi-device', async () => ({ allow: !p.user.multi_device_ok })),
+            has('set_roles') && roleOptions.length > 1 && act('Set role', '/role', async () => ask('Staff role', [{ name: 'role', label: 'Role', options: roleOptions, value: u.staff_role || 'player' }], 'Set')),
+            has('delete_account') && act('Delete account', '', async () => ask(`Type the username (${u.username}) to delete this account for good`, [{ name: 'confirm', label: 'Username' }], 'Delete', true), { danger: true, method: 'DELETE' }),
+        ].filter(Boolean);
         const facts = [['Id', u.id], ['Login', u.method], ['Role', u.staff_role || 'player'], ['Created', when(u.created_at)], ['Last seen', when(u.last_seen_at)], ['E-mail', u.email || '-'],
             ['Terms accepted', u.tos_accepted_at ? when(u.tos_accepted_at) : 'no'], ['Online now', p.online ? `yes (${p.online} device${p.online > 1 ? 's' : ''})` : 'no'], ['Several devices allowed', u.multi_device_ok ? 'yes' : 'no'],
             ['Ban', banned ? `${u.banned_until ? `until ${when(u.banned_until)}` : 'permanent'}; shown: ${u.ban_public_reason || '-'}; private: ${u.ban_reason || '-'}` : 'none']];

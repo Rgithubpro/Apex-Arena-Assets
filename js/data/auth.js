@@ -21,7 +21,7 @@
 const PROD_AUTH_URL = 'https://apex-arena-auth-server.onrender.com';
 const DEV_AUTH_URL = 'http://localhost:3001';
 
-const AUTH_BASE_URL = PROD_AUTH_URL; //['localhost', '127.0.0.1'].includes(location.hostname) ? DEV_AUTH_URL : PROD_AUTH_URL;
+const AUTH_BASE_URL = PROD_AUTH_URL;//['localhost', '127.0.0.1'].includes(location.hostname) ? DEV_AUTH_URL : PROD_AUTH_URL;
 
 const DB_NAME = 'apex-arena-auth';
 const STORE_NAME = 'kv';
@@ -297,6 +297,7 @@ let watchTimer = null;
 function stopWatch() {
     clearInterval(watchTimer);
     watchTimer = null;
+    stopEvents();
 }
 
 /** Banned: forget the login, remember the message for the next load, and restart the app. */
@@ -379,12 +380,80 @@ async function onSessionKilled(code, message) {
             ],
         });
     } else {
-        showAccountPopup({ title: 'Logged out', text: message || 'You were logged out by staff.', buttons: [{ label: 'OK', primary: true, onClick: reload }] });
+        showAccountPopup({ title: code === 'ip_banned' ? 'Network blocked' : 'Logged out', text: message || 'You were logged out by staff.', buttons: [{ label: 'OK', primary: true, onClick: reload }] });
     }
+}
+
+/* ---------------- live push from the server: bans, kicks and the one-device rule arrive at once ---------------- */
+let eventsAbort = null;
+
+function stopEvents() {
+    eventsAbort?.abort();
+    eventsAbort = null;
+}
+
+function handlePush(event) {
+    if (event.type === 'account_banned') return onBanned(event.reason ?? null, event.until ?? null);
+    if (event.type === 'account_deleted') return onSessionEnded();
+    if (['multiple_devices', 'logged_out_by_staff', 'ip_banned'].includes(event.type)) return onSessionKilled(event.type, event.message);
+    return undefined;
+}
+
+async function openEventStream() {
+    if (eventsAbort || !session) return;
+    const abort = new AbortController();
+    eventsAbort = abort;
+    while (!abort.signal.aborted && session) {
+        try {
+            const token = await getAccessToken();
+            const headers = { Authorization: `DPoP ${token}`, DPoP: await makeProof('GET', '/me/events', token), Accept: 'text/event-stream' };
+            const devKey = await getDevKey();
+            if (devKey) headers['X-Dev-Key'] = devKey;
+            const res = await fetch(`${AUTH_BASE_URL}/me/events`, { headers, cache: 'no-store', signal: abort.signal });
+            if (!res.ok || !res.body) throw new Error(`events ${res.status}`);
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            for (;;) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                let cut;
+                while ((cut = buffer.indexOf('\n\n')) >= 0) {
+                    const chunk = buffer.slice(0, cut);
+                    buffer = buffer.slice(cut + 2);
+                    const line = chunk.split('\n').find((l) => l.startsWith('data: '));
+                    if (line) { try { await handlePush(JSON.parse(line.slice(6))); } catch { /* ignore a bad message */ } }
+                }
+            }
+        } catch { /* closed or offline: reconnect below */ }
+        if (abort.signal.aborted) break;
+        await sleep(3000);
+    }
+    if (eventsAbort === abort) eventsAbort = null;
+}
+
+let configPromise = null;
+const getConfig = () => (configPromise ??= request('GET', '/auth/config', { proof: false }).catch(() => ({ captcha: null })));
+
+let turnstilePromise = null;
+function loadTurnstile() {
+    turnstilePromise ??= new Promise((resolve, reject) => {
+        if (window.turnstile) return resolve();
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => { turnstilePromise = null; reject(new Error('captcha script blocked')); };
+        document.head.append(script);
+        return undefined;
+    });
+    return turnstilePromise;
 }
 
 function startWatch() {
     if (watchTimer) return;
+    openEventStream();
     const tick = async () => {
         if (!session) return;
         try {
@@ -542,6 +611,19 @@ export const Auth = {
         return { title: 'Login failed', text: `${text} (${error})` };
     },
 
+    /** Shows the Cloudflare Turnstile check inside `container` when the server has it switched on. Returns { reset() } or null. */
+    async renderCaptcha(container, onToken) {
+        const { captcha } = await getConfig();
+        if (!captcha) return null;
+        try { await loadTurnstile(); } catch { return null; }
+        container.replaceChildren();
+        const id = window.turnstile.render(container, {
+            sitekey: captcha.siteKey, theme: 'dark',
+            callback: (token) => onToken(token), 'expired-callback': () => onToken(null), 'error-callback': () => onToken(null),
+        });
+        return { reset: () => { onToken(null); try { window.turnstile.reset(id); } catch { /* ignore */ } } };
+    },
+
     /** 'google', 'email', 'guest', ... or null: the method used on this device last time. */
     lastLoginMethod() {
         try {
@@ -568,8 +650,8 @@ export const Auth = {
         return (await request('GET', '/auth/providers', { proof: false })).providers;
     },
 
-    async signupEmail({ username, email, password }) {
-        const tokens = await request('POST', '/auth/signup', { body: { username, email, password } });
+    async signupEmail({ username, email, password, captchaToken }) {
+        const tokens = await request('POST', '/auth/signup', { body: { username, email, password, captcha_token: captchaToken } });
         await setSession(tokens);
         return tokens.user;
     },
@@ -580,10 +662,16 @@ export const Auth = {
     },
 
     /** Guest = this browser's key. Needs storage that survives a reload. */
-    async guest(usernameHint) {
+    /** Which guest account does this browser already have? { exists, username } (at most one per device) */
+    async guestLookup() {
+        return request('POST', '/auth/guest/lookup', { body: {} });
+    },
+
+    /** replace: true deletes the guest this device already has and starts a new one (needs the captcha, when switched on). */
+    async guest(usernameHint, { replace = false, captchaToken } = {}) {
         await getDeviceKey();
         if (!persistent) throw new AuthError('storage_unavailable', 0, 'Guest accounts need browser storage, which is turned off here.');
-        const tokens = await request('POST', '/auth/guest', { body: { username_hint: usernameHint } });
+        const tokens = await request('POST', '/auth/guest', { body: { username_hint: usernameHint, replace, captcha_token: captchaToken } });
         await setSession(tokens);
         return tokens.user;
     },
